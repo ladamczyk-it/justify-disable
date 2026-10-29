@@ -1,6 +1,12 @@
-import type { IToolDirectives } from './types.ts';
+import type { IToolDirectives, TRuleName, TRuleSeverity } from './types.ts';
 
 export const DEFAULT_CONCURRENCY = 64;
+export const DEFAULT_RULES: Record<TRuleName, TRuleSeverity> = {
+  missingReason: 'error',
+  expired: 'error',
+  invalidCondition: 'error',
+  missingDate: 'off',
+};
 export const DEFAULT_TOOLS: Record<'eslint' | 'stylelint', IToolDirectives> = {
   eslint: {
     directive: /(?:\/\/|\/\*)\s*(eslint-disable(?:-next-line|-line)?)(?=\s|\*\/|$)/gm,

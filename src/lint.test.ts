@@ -56,6 +56,8 @@ describe('lint in a git repo', () => {
           column: 1,
           directive: 'eslint-disable-next-line',
           tool: 'eslint',
+          rule: 'missingReason',
+          severity: 'error',
           message: 'eslint-disable-next-line has no @todo reason above it',
         },
       ],

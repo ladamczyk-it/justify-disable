@@ -1,12 +1,19 @@
 import { extname, matchesGlob, isAbsolute } from 'node:path';
 
-import { DEFAULT_CONCURRENCY, DEFAULT_EXTENSIONS, DEFAULT_TOOLS } from './defaults.ts';
+import {
+  DEFAULT_CONCURRENCY,
+  DEFAULT_EXTENSIONS,
+  DEFAULT_RULES,
+  DEFAULT_TOOLS,
+} from './defaults.ts';
 
 import type {
   IJustifyDisableConfig,
   IProvidedFile,
   IToolDirectives,
   TFileProvider,
+  TRuleName,
+  TRuleSeverity,
 } from './types.ts';
 
 export interface IResolvedConfig {
@@ -15,6 +22,7 @@ export interface IResolvedConfig {
   ignorePatterns: string[];
   provider?: TFileProvider;
   concurrency: number;
+  rules: Record<TRuleName, TRuleSeverity>;
 }
 
 const assertKnownTools = (names: string[], tools: Record<string, IToolDirectives>): void => {
@@ -23,6 +31,20 @@ const assertKnownTools = (names: string[], tools: Record<string, IToolDirectives
       throw new Error(`unknown tool "${name}"`);
     }
   }
+};
+
+const SEVERITIES: readonly string[] = ['error', 'warn', 'off'];
+
+const resolveRules = (rules: IJustifyDisableConfig['rules'] = {}) => {
+  for (const [name, severity] of Object.entries(rules)) {
+    if (!Object.hasOwn(DEFAULT_RULES, name)) {
+      throw new Error(`unknown rule "${name}"`);
+    }
+    if (!SEVERITIES.includes(severity)) {
+      throw new Error(`rule "${name}" must be "error", "warn" or "off"`);
+    }
+  }
+  return { ...DEFAULT_RULES, ...rules };
 };
 
 const normaliseTool = ({ directive, reason }: IToolDirectives): IToolDirectives => ({
@@ -62,6 +84,7 @@ export const resolveConfig = (
     ),
     ...(config.provider && { provider: config.provider }),
     concurrency,
+    rules: resolveRules(config.rules),
   };
 };
 

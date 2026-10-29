@@ -14,6 +14,8 @@ const failed: ILintResult = {
       column: 1,
       directive: 'eslint-disable',
       tool: 'eslint',
+      rule: 'missingReason',
+      severity: 'error',
       message: 'unjustified eslint-disable',
     },
     {
@@ -22,6 +24,8 @@ const failed: ILintResult = {
       column: 3,
       directive: 'stylelint-disable',
       tool: 'stylelint',
+      rule: 'missingReason',
+      severity: 'error',
       message: 'unjustified stylelint-disable',
     },
   ],

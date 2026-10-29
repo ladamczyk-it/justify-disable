@@ -76,6 +76,8 @@ export const scanSource = (
         column: match.index - lineStarts[lineIndex]! + 1,
         directive: match[1]!,
         tool,
+        rule: 'missingReason',
+        severity: 'error',
         message: `${match[1]!} has no${message} above it`,
       });
     }

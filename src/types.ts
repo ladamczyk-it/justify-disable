@@ -18,12 +18,16 @@ export type TFileProvider = (
   context: IProviderContext
 ) => IProvidedFile[] | Promise<IProvidedFile[]>;
 
+export type TRuleName = 'missingReason' | 'expired' | 'invalidCondition' | 'missingDate';
+export type TRuleSeverity = 'error' | 'warn' | 'off';
+
 export interface IJustifyDisableConfig {
   tools?: Record<string, IToolDirectives>; // merged by key over DEFAULT_TOOLS
   extensions?: Record<string, string[]>; // key: extension without dot, lowercase; a key replaces that entry, others keep defaults
   ignorePatterns?: string[]; // path.matchesGlob; a pattern with no `/` matches at any depth (`**/` prepended)
   provider?: TFileProvider; // replaces the git provider
   concurrency?: number; // positive integer, default 64
+  rules?: Partial<Record<TRuleName, TRuleSeverity>>; // merged by key over DEFAULT_RULES
   stats?: boolean; // consent; same three-state semantics as structurelint
 }
 export interface ILintOptions {
@@ -40,6 +44,8 @@ export interface IViolation {
   column: number;
   directive: string;
   tool: string;
+  rule: TRuleName;
+  severity: 'error' | 'warn'; // 'off' rules emit nothing
   message: string;
 }
 export interface ILintResult {
