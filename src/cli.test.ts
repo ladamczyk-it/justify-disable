@@ -169,11 +169,21 @@ describe('cli exit after flush', () => {
 });
 
 describe('public exports', () => {
+  it('exposes the default rules', () => {
+    expect(api.DEFAULT_RULES).toStrictEqual({
+      missingReason: 'error',
+      expired: 'error',
+      invalidCondition: 'error',
+      missingDate: 'off',
+    });
+  });
+
   it('exposes the library API and no run', () => {
     expect(Object.keys(api).toSorted()).toStrictEqual([
       'DEFAULT_CONCURRENCY',
       'DEFAULT_CONFIG_FILES',
       'DEFAULT_EXTENSIONS',
+      'DEFAULT_RULES',
       'DEFAULT_TOOLS',
       'format',
       'gitProvider',

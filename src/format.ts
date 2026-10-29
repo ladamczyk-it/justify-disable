@@ -14,17 +14,30 @@ export const format = (result: ILintResult, json = false): string => {
     return `${JSON.stringify({ passed, scanned, violations }, null, 2)}\n`;
   }
 
-  if (result.passed) {
-    return c.green(`\n✔ No unjustified disable directives (${result.scanned} files scanned).\n`);
+  const { violations, scanned } = result;
+
+  if (violations.length === 0) {
+    return c.green(`\n✔ No unjustified disable directives (${scanned} files scanned).\n`);
   }
 
   let output = '\n';
 
-  result.violations.forEach(({ path, line, column, message }) => {
-    output += c.red(`✖ ${path}:${line}:${column}  ${message}\n`);
+  violations.forEach(({ path, line, column, message, severity }) => {
+    const text = `${path}:${line}:${column}  ${message}\n`;
+
+    output += severity === 'warn' ? c.yellow(`⚠ ${text}`) : c.red(`✖ ${text}`);
   });
 
-  output += c.red(`\n${result.violations.length} unjustified disable directive(s) found.\n`);
+  const errors = violations.filter(({ severity }) => severity === 'error').length;
+  const warnings = violations.length - errors;
+
+  output += errors
+    ? c.red(`\n${errors} unjustified disable directive(s) found.\n`)
+    : c.green(`\n✔ No unjustified disable directives (${scanned} files scanned).\n`);
+
+  if (warnings) {
+    output += c.yellow(`${warnings} warning(s).\n`);
+  }
 
   return output;
 };
