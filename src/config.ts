@@ -4,7 +4,7 @@ import type { IJustifyDisableConfig } from './types.ts';
 
 const moduleName = 'justify-disable';
 
-/** Config file names looked up (in order) in the current working directory. */
+/** Config file names looked up (in order), starting in the working directory and walking up to the nearest directory with a `package.json` (or `package.yaml`). */
 export const DEFAULT_CONFIG_FILES = [
   'justify-disable.config.ts',
   'justify-disable.config.js',
@@ -25,8 +25,8 @@ export const searchConfig = (): Promise<{ config: unknown; filepath: string } | 
   explorer.search();
 
 /**
- * Discovers and loads the `justify-disable.config.*` file in the current
- * working directory and returns its default export. With no config file the
+ * Discovers and loads the `justify-disable.config.*` file, searching from the
+ * working directory up to the nearest `package.json`, and returns its default export. With no config file the
  * result is `{}`, so the defaults apply.
  */
 export const loadConfig = async (): Promise<IJustifyDisableConfig> => {

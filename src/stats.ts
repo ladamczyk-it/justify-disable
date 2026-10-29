@@ -36,7 +36,7 @@ const askConsent = async (filepath: string): Promise<boolean> => {
 // Splices the single key into the user's own config source; re-serializing the
 // parsed config would drop their comments, imports and formatting. Two shapes are
 // handled: a directly exported object literal, and the `const config = {…};
-// export default config;` shape the docs use.
+// export default config;` shape, which is common in hand-written configs.
 const patchSource = (source: string, stats: boolean): string | undefined => {
   const inline = /((?:module\.exports\s*=|export\s+default)\s*\{)/;
 

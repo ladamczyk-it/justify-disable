@@ -86,7 +86,7 @@ justify-disable -h               # list all options
 
 ## Config
 
-Create `justify-disable.config.ts` (or `.js`, `.mjs`, `.cjs`) in the working directory and default-export an object. Every key is optional.
+Create `justify-disable.config.ts` (or `.js`, `.mjs`, `.cjs`) in the working directory (or any parent, up to the nearest directory containing a `package.json` or `package.yaml`) and default-export an object. Every key is optional.
 
 ```ts
 import type { IJustifyDisableConfig } from '@ladamczyk/justify-disable';
