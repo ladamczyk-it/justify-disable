@@ -18,6 +18,6 @@ export default {
     unstable_skill_docs: true,
     unstable_skill_diagrams: true,
     unstable_skill_sheriff: true,
-    unstable_skill_review: true
-  }
+    unstable_skill_review: true,
+  },
 };
