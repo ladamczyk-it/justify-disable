@@ -4,7 +4,7 @@
 
 Suppressions without a stated reason rot: nobody remembers why a rule was switched off, so nobody dares to switch it back on. `justify-disable` fails when an `eslint-disable` or `stylelint-disable` directive has no `@todo <reason>` comment directly above it.
 
-It is inspired by unicorn's `expiring-todo-comments`, which can validate the content of a `@todo` and its expiry. This tool is deliberately smaller: it only checks that a reason is there, not what it says.
+It is heavily inspired by unicorn's [`expiring-todo-comments`](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/expiring-todo-comments.md). A `@todo` can carry a bracketed condition (`@todo [2030-01-01] …`) that expires it: a date, the project's own version, an engine or dependency range, or a dependency being added or removed. See [todo conditions](docs/todo-conditions.md).
 
 ## Install
 
@@ -34,6 +34,7 @@ const response: any = await legacyCall();
 - `//`, `/* */` and JSX `{/* */}` comments are accepted in JS-family files. CSS-family files accept block comments only.
 - A blank line between the comment and the directive breaks the link.
 - A same-line `-- reason` (`// eslint-disable-line no-console -- why`) does not count.
+- A bracketed condition may follow `@todo` (`@todo [2030-01-01] <text>`), see [todo conditions](docs/todo-conditions.md).
 
 ### Defaults
 
@@ -81,7 +82,7 @@ justify-disable -h               # list all options
 | Exit code | Meaning                                         |
 | --------- | ----------------------------------------------- |
 | `0`       | No unjustified directives                       |
-| `1`       | At least one unjustified directive              |
+| `1`       | At least one `error`-severity violation         |
 | `2`       | Any error (bad config, not a git repository, …) |
 
 ## Config
@@ -139,6 +140,29 @@ Matched against the posix path (relative to the working directory) with `path.ma
 
 Number of files read in parallel, a positive integer, default `64` (`DEFAULT_CONCURRENCY`). The `--concurrency` flag and the `concurrency` option of `lint()` override it.
 
+### `rules`
+
+Four rules, each with a severity. Merged by key over `DEFAULT_RULES`:
+
+| Rule               | Default | Reports                                       |
+| ------------------ | ------- | --------------------------------------------- |
+| `missingReason`    | `error` | a directive with no `@todo <reason>` above it |
+| `expired`          | `error` | a `@todo` condition that is met               |
+| `invalidCondition` | `error` | a `@todo` condition that cannot be checked    |
+| `missingDate`      | `off`   | a `@todo` with no date condition              |
+
+`error` fails the run (exit `1`). `warn` is printed with a `⚠` and exits `0`. `off` reports nothing. `passed` is false only when some violation has `error` severity. An unknown rule name, or a severity other than `error`, `warn` or `off`, throws.
+
+```ts
+import type { IJustifyDisableConfig } from '@ladamczyk/justify-disable';
+
+export default {
+  rules: { missingDate: 'warn', expired: 'warn' },
+} satisfies IJustifyDisableConfig;
+```
+
+The conditions these rules report are described in [todo conditions](docs/todo-conditions.md).
+
 ### `provider`
 
 The extension point for where files come from. It replaces the default git provider (`gitProvider`); the qoq provider lives in qoq, not here.
@@ -179,7 +203,7 @@ const result = await lint({ paths: ['src'], stats: false });
 
 result.passed; // boolean, no violations
 result.scanned; // number of files read
-result.violations; // Array<{ path, line, column, directive, tool, message }>
+result.violations; // Array<{ path, line, column, directive, tool, rule, severity, message }>
 
 process.stdout.write(format(result)); // or format(result, true) for JSON
 ```
@@ -190,10 +214,11 @@ Pass `config` to skip config-file discovery:
 const result = await lint({ config: { ignorePatterns: ['dist/**'] }, stats: false });
 ```
 
-Additional exports: `loadConfig`, `DEFAULT_CONFIG_FILES`, `DEFAULT_TOOLS`, `DEFAULT_EXTENSIONS`, `DEFAULT_CONCURRENCY`, `gitProvider`, and the types `IToolDirectives`, `IProvidedFile`, `IProviderContext`, `TFileProvider`, `IJustifyDisableConfig`, `ILintOptions`, `IViolation`, `ILintResult`.
+Additional exports: `loadConfig`, `DEFAULT_CONFIG_FILES`, `DEFAULT_TOOLS`, `DEFAULT_EXTENSIONS`, `DEFAULT_CONCURRENCY`, `DEFAULT_RULES`, `gitProvider`, and the types `IToolDirectives`, `IProvidedFile`, `IProviderContext`, `TFileProvider`, `IJustifyDisableConfig`, `ILintOptions`, `IViolation`, `ILintResult`, `TRuleName`, `TRuleSeverity`.
 
 ## Contents
 
 - [justify-disable](docs/index.md)
 - [CLI, config file and stats](docs/cli-and-stats.md)
 - [Lint flow](docs/lint-flow.md)
+- [Todo conditions](docs/todo-conditions.md)
