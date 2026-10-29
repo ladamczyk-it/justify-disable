@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
+import { loadConfig } from './config.ts';
 import { gitProvider } from './provider.ts';
 import { resolveConfig, selectFiles } from './resolve.ts';
 import { scanSource } from './scan.ts';
@@ -8,7 +9,7 @@ import { scanSource } from './scan.ts';
 import type { ILintOptions, ILintResult, IViolation } from './types.ts';
 
 export const lint = async (options: ILintOptions): Promise<ILintResult> => {
-  const resolved = resolveConfig(options.config, options.concurrency);
+  const resolved = resolveConfig(options.config ?? (await loadConfig()), options.concurrency);
   const provider = resolved.provider ?? gitProvider;
   const files = selectFiles(await provider({ paths: options.paths ?? [] }), resolved);
 

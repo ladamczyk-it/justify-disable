@@ -43,6 +43,7 @@
   "dependencies": {
     "@ladamczyk/qoq-utils": "6.4.2",
     "cac": "7.1.0",
+    "cosmiconfig": "10.0.1",
     "picocolors": "1.1.1"
   },
   "devDependencies": {
