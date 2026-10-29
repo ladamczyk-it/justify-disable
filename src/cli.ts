@@ -13,6 +13,12 @@ interface ICliOptions {
   concurrency?: number | string;
 }
 
+// Exiting straight after `write` can cut off piped output where pipe writes are
+// asynchronous (macOS), e.g. `justify-disable --json | jq`.
+const exitAfterWrite = (stream: NodeJS.WriteStream, text: string, code: EExitCode): void => {
+  stream.write(text, () => process.exit(code));
+};
+
 const cli = cac('justify-disable');
 
 cli
@@ -38,20 +44,25 @@ cli
         stats: false,
       });
 
-      process.stdout.write(format(result, options.json ?? false));
-      process.exit(result.passed ? EExitCode.OK : EExitCode.ERROR);
+      exitAfterWrite(
+        process.stdout,
+        format(result, options.json ?? false),
+        result.passed ? EExitCode.OK : EExitCode.ERROR
+      );
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
 
       if (options.json) {
-        process.stdout.write(`${JSON.stringify({ passed: false, error: message }, null, 2)}\n`);
+        exitAfterWrite(
+          process.stdout,
+          `${JSON.stringify({ passed: false, error: message }, null, 2)}\n`,
+          EExitCode.EXCEPTION
+        );
       } else {
         const line = c.red(`✖ ${message}`);
 
-        process.stderr.write(`${line}\n`);
+        exitAfterWrite(process.stderr, `${line}\n`, EExitCode.EXCEPTION);
       }
-
-      process.exit(EExitCode.EXCEPTION);
     }
   });
 

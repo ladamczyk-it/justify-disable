@@ -5,7 +5,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as api from './index.ts';
 
@@ -104,6 +104,67 @@ describe('cli', () => {
     const { code, stderr } = await runCli('--concurrency', '0');
     expect(code).toBe(2);
     expect(stderr).toContain('concurrency must be a positive integer');
+  });
+});
+
+describe('cli exit after flush', () => {
+  const lintMock = vi.fn();
+  let heldCallback: (() => void) | undefined;
+  const originalArgv = process.argv;
+
+  // Runs the CLI in-process with the stream's write holding its callback, so
+  // the test controls when the write "finishes".
+  const startCli = async (stream: NodeJS.WriteStream, ...args: string[]) => {
+    heldCallback = undefined;
+    const write = vi.spyOn(stream, 'write').mockImplementation((...writeArgs: unknown[]) => {
+      heldCallback = writeArgs.find((arg) => typeof arg === 'function') as () => void;
+      return true;
+    });
+    const exit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    process.argv = [process.execPath, CLI, ...args];
+    vi.resetModules();
+    vi.doMock('./stats.ts', () => ({
+      resolveConsent: vi.fn().mockResolvedValue(false),
+      sendStats: vi.fn(),
+    }));
+    vi.doMock('./lint.ts', () => ({ lint: lintMock }));
+    await import('./cli.ts');
+    await vi.waitFor(() => {
+      expect(write).toHaveBeenCalled();
+    });
+    write.mockRestore();
+    return exit;
+  };
+
+  afterEach(() => {
+    process.argv = originalArgv;
+    vi.doUnmock('./stats.ts');
+    vi.doUnmock('./lint.ts');
+    vi.restoreAllMocks();
+  });
+
+  it('exits with the result code only after stdout has flushed', async () => {
+    lintMock.mockResolvedValue({ passed: true, scanned: 0, violations: [] });
+    const exit = await startCli(process.stdout);
+    expect(exit).not.toHaveBeenCalled();
+    heldCallback?.();
+    expect(exit).toHaveBeenCalledWith(0);
+  });
+
+  it('exits 2 only after the --json error payload on stdout has flushed', async () => {
+    lintMock.mockRejectedValue(new Error('boom'));
+    const exit = await startCli(process.stdout, '--json');
+    expect(exit).not.toHaveBeenCalled();
+    heldCallback?.();
+    expect(exit).toHaveBeenCalledWith(2);
+  });
+
+  it('exits 2 only after the error line on stderr has flushed', async () => {
+    lintMock.mockRejectedValue(new Error('boom'));
+    const exit = await startCli(process.stderr);
+    expect(exit).not.toHaveBeenCalled();
+    heldCallback?.();
+    expect(exit).toHaveBeenCalledWith(2);
   });
 });
 
