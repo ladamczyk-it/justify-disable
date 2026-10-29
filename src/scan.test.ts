@@ -273,3 +273,30 @@ describe('DEFAULT_EXTENSIONS', () => {
     });
   });
 });
+
+describe('default reason regexes', () => {
+  const pathological = `/* ${'@todo ['.repeat(20_000)} */\n`;
+
+  it('scans many unclosed @todo [ in a block comment in linear time (eslint)', () => {
+    const start = performance.now();
+    scanEslint(`${pathological}// eslint-disable-next-line\nx`);
+    expect(performance.now() - start).toBeLessThan(500);
+  });
+
+  it('scans many unclosed @todo [ in a block comment in linear time (stylelint)', () => {
+    const start = performance.now();
+    scanStylelint(`${pathological}/* stylelint-disable-next-line */\nx`);
+    expect(performance.now() - start).toBeLessThan(500);
+  });
+
+  it('accepts a multi-line condition list as a reason', () => {
+    const source =
+      '/**\n * @todo [2999-01-01,\n *   +lodash] drop it\n */\n// eslint-disable-next-line\nx';
+    expect(scanEslint(source).filter((v) => v.rule === 'missingReason')).toStrictEqual([]);
+  });
+
+  it('accepts a condition containing @ as a reason', () => {
+    const source = '// @todo [lodash@>4] drop it\n// eslint-disable-next-line\nx';
+    expect(scanEslint(source).filter((v) => v.rule === 'missingReason')).toStrictEqual([]);
+  });
+});
