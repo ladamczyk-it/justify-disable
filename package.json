@@ -1,6 +1,6 @@
 {
   "name": "@ladamczyk/justify-disable",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "CLI that requires a justification for every lint disable comment, heavily inspired by unicorn's expiring-todo-comments",
   "keywords": [
     "cli"
