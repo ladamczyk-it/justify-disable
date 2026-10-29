@@ -15,6 +15,7 @@ export const DEFAULT_CONFIG_FILES = [
 // Module-level, not per call: cosmiconfig caches each search, so repeated
 // `searchConfig` calls read the config file once.
 const explorer = cosmiconfig(moduleName, {
+  // qoq-sheriff: accepted — This package is to js/TS projects only
   searchStrategy: 'project',
   searchPlaces: DEFAULT_CONFIG_FILES,
 });
