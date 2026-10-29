@@ -53,3 +53,10 @@ export interface ILintResult {
   scanned: number;
   violations: IViolation[];
 }
+/** The fields of a package.json that `@todo` conditions read. */
+export interface IPackageJson {
+  version?: string;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  engines?: Record<string, string>;
+}

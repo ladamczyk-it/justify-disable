@@ -1,5 +1,7 @@
 import semver from 'semver';
 
+import type { IPackageJson } from './types.ts';
+
 export type TCondition =
   | { kind: 'date'; token: string; date: string }
   | { kind: 'version'; token: string; range: string }
@@ -98,4 +100,71 @@ export const parseConditions = (comment: string): TCondition[] => {
   }
   const seen = { date: false, version: false };
   return (match[1] ?? '').split(',').map((token) => classify(token.trim(), seen));
+};
+
+type TEvaluation = { status: 'met' | 'unmet' } | { status: 'invalid'; detail: string };
+
+const invalid = (detail: string): TEvaluation => ({ status: 'invalid', detail });
+const verdict = (met: boolean): TEvaluation => ({ status: met ? 'met' : 'unmet' });
+
+// Own properties only: user-supplied names must not reach `Object.prototype` members.
+const ownEntry = (record: Record<string, string> | undefined, name: string) =>
+  record && Object.hasOwn(record, name) ? record[name] : undefined;
+
+/** Lowest version a declared range allows; null for anything semver cannot read (`workspace:*`, URLs). */
+const lowestVersion = (declared: string) =>
+  semver.validRange(declared) === null ? null : semver.minVersion(declared);
+
+const satisfiesFromDeclared = (declared: string, range: string, subject: string): TEvaluation => {
+  const lowest = lowestVersion(declared);
+  return lowest
+    ? verdict(semver.satisfies(lowest, range, { includePrerelease: true }))
+    : invalid(`${subject} range "${declared}" is not a semver range`);
+};
+
+const evaluateAgainst = (
+  condition: Exclude<TCondition, { kind: 'invalid' | 'date' }>,
+  pkg: IPackageJson
+): TEvaluation => {
+  switch (condition.kind) {
+    case 'version':
+      return semver.valid(pkg.version)
+        ? verdict(
+            semver.satisfies(pkg.version as string, condition.range, { includePrerelease: true })
+          )
+        : invalid('no version in package.json');
+    case 'added':
+    case 'removed': {
+      const declared =
+        ownEntry(pkg.dependencies, condition.name) !== undefined ||
+        ownEntry(pkg.devDependencies, condition.name) !== undefined;
+      return verdict(declared === (condition.kind === 'added'));
+    }
+    case 'dependency': {
+      const declared =
+        ownEntry(pkg.dependencies, condition.name) ?? ownEntry(pkg.devDependencies, condition.name);
+      return declared === undefined
+        ? invalid(`${condition.name} is not declared in package.json`)
+        : satisfiesFromDeclared(declared, condition.range, condition.name);
+    }
+    default: {
+      const declared = ownEntry(pkg.engines, condition.engine);
+      return declared === undefined
+        ? invalid(`no engines.${condition.engine} in package.json`)
+        : satisfiesFromDeclared(declared, condition.range, `engines.${condition.engine}`);
+    }
+  }
+};
+
+export const evaluateCondition = (
+  condition: Exclude<TCondition, { kind: 'invalid' }>,
+  readPackageJson: () => IPackageJson | null
+): TEvaluation => {
+  if (condition.kind === 'date') {
+    return verdict(new Date().toISOString().slice(0, 10) > condition.date);
+  }
+  const pkg = readPackageJson();
+  return pkg
+    ? evaluateAgainst(condition, pkg)
+    : invalid(`no package.json found (needed for the ${condition.kind} condition)`);
 };
