@@ -7,6 +7,8 @@ export const DEFAULT_RULES: Record<TRuleName, TRuleSeverity> = {
   invalidCondition: 'error',
   missingDate: 'off',
 };
+// The reason regexes accept an optional `[condition]` after `@todo` but require prose after it
+// (`[^\s*[]`), so a condition list alone is not a reason.
 export const DEFAULT_TOOLS: Record<'eslint' | 'stylelint', IToolDirectives> = {
   eslint: {
     directive: /(?:\/\/|\/\*)\s*(eslint-disable(?:-next-line|-line)?)(?=\s|\*\/|$)/gm,

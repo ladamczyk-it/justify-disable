@@ -5,7 +5,8 @@ import type { ILintResult } from './types.ts';
 /**
  * Renders an {@link ILintResult} into a console-ready string. With `json`, emits
  * machine-readable output (for AI/tooling consumption); otherwise a colorized
- * pass message or the list of violations.
+ * list of violations. Warnings-only results print the warnings and then the pass
+ * message, since `passed` ignores warnings.
  */
 export const format = (result: ILintResult, json = false): string => {
   if (json) {
