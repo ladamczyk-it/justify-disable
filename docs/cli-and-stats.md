@@ -6,7 +6,7 @@
 
 > Source: documented from plan
 
-`justify-disable [...paths] [--json] [--concurrency <n>]` resolves consent, calls `lint()`, prints the result with `format()` and exits 0 (passed), 1 (violations) or 2 (any thrown error). Under `--json` errors are printed to stdout as `{ passed: false, error }` so stdout stays parseable; otherwise they go to stderr.
+`justify-disable [...paths] [--json] [--concurrency <n>]` resolves consent, calls `lint()`, prints the result with `format()` and exits 0 (passed; warnings alone still pass), 1 (at least one error-severity violation) or 2 (any thrown error). Under `--json` errors are printed to stdout as `{ passed: false, error }` so stdout stays parseable; otherwise they go to stderr.
 
 ## Config file discovery
 

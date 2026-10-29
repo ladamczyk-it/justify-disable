@@ -56,10 +56,20 @@ describe('lint in a git repo', () => {
           column: 1,
           directive: 'eslint-disable-next-line',
           tool: 'eslint',
+          rule: 'missingReason',
+          severity: 'error',
           message: 'eslint-disable-next-line has no @todo reason above it',
         },
       ],
     });
+  });
+
+  it('passes with a warn-level violation', async () => {
+    git('init', '-q');
+    await write('src/a.ts', UNJUSTIFIED);
+    const result = await lint({ config: { rules: { missingReason: 'warn' } }, stats: false });
+    expect(result.passed).toBe(true);
+    expect(result.violations).toMatchObject([{ severity: 'warn' }]);
   });
 
   it('passes when every directive is justified', async () => {
@@ -90,6 +100,52 @@ describe('lint in a git repo', () => {
   it('rejects outside a git repository', async () => {
     await expect(lint({ stats: false })).rejects.toThrow(
       'not a git repository — run inside one or configure a provider'
+    );
+  });
+});
+
+describe('lint with @todo conditions', () => {
+  const LODASH_TODO = '// @todo [+lodash] r\n// eslint-disable-next-line no-console\n';
+  const withLodash = JSON.stringify({ devDependencies: { lodash: '^4' } });
+
+  it('reports a +lodash condition as expired when lodash is declared', async () => {
+    git('init', '-q');
+    await write('package.json', withLodash);
+    await write('src/a.ts', LODASH_TODO);
+    const result = await lint({ stats: false });
+    expect(result.passed).toBe(false);
+    expect(result.violations).toMatchObject([
+      { path: 'src/a.ts', rule: 'expired', message: expect.stringContaining('[+lodash]') },
+    ]);
+  });
+
+  it('reads the package.json nearest to each file', async () => {
+    git('init', '-q');
+    await write('package.json', JSON.stringify({ name: 'root' }));
+    await write('pkg/b/package.json', withLodash);
+    await write('pkg/b/x.ts', LODASH_TODO);
+    await write('x.ts', LODASH_TODO);
+    const result = await lint({ stats: false });
+    expect(result.violations.map(({ path, rule }) => `${path}:${rule}`)).toStrictEqual([
+      'pkg/b/x.ts:expired',
+    ]);
+  });
+
+  it('passes when expired is configured as warn', async () => {
+    git('init', '-q');
+    await write('package.json', withLodash);
+    await write('src/a.ts', LODASH_TODO);
+    const result = await lint({ config: { rules: { expired: 'warn' } }, stats: false });
+    expect(result.passed).toBe(true);
+    expect(result.violations).toMatchObject([{ rule: 'expired', severity: 'warn' }]);
+  });
+
+  it('rejects naming a malformed package.json', async () => {
+    git('init', '-q');
+    await write('package.json', '{ not json');
+    await write('src/a.ts', LODASH_TODO);
+    await expect(lint({ stats: false })).rejects.toThrow(
+      `invalid package.json: ${join(workDir, 'package.json')}`
     );
   });
 });

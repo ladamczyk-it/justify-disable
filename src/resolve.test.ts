@@ -4,7 +4,12 @@ import { join, relative } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { DEFAULT_CONCURRENCY, DEFAULT_EXTENSIONS, DEFAULT_TOOLS } from './defaults.ts';
+import {
+  DEFAULT_CONCURRENCY,
+  DEFAULT_EXTENSIONS,
+  DEFAULT_RULES,
+  DEFAULT_TOOLS,
+} from './defaults.ts';
 import { lint } from './lint.ts';
 import { resolveConfig, selectFiles } from './resolve.ts';
 
@@ -148,5 +153,28 @@ describe('selectFiles', () => {
     } finally {
       await rm(directory, { recursive: true });
     }
+  });
+});
+
+describe('resolveConfig rules', () => {
+  it('defaults to DEFAULT_RULES', () => {
+    expect(resolveConfig({}).rules).toStrictEqual(DEFAULT_RULES);
+  });
+
+  it('merges a single override over the defaults', () => {
+    expect(resolveConfig({ rules: { expired: 'warn' } }).rules).toStrictEqual({
+      ...DEFAULT_RULES,
+      expired: 'warn',
+    });
+  });
+
+  it.each(['nope', 'toString'])('rejects the unknown rule %s', (name) => {
+    expect(() => resolveConfig({ rules: { [name]: 'error' } })).toThrow(`unknown rule "${name}"`);
+  });
+
+  it('rejects an invalid severity', () => {
+    expect(() => resolveConfig({ rules: { expired: 'loud' as never } })).toThrow(
+      'rule "expired" must be "error", "warn" or "off"'
+    );
   });
 });

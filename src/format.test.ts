@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { format } from './format.ts';
 
-import type { ILintResult } from './types.ts';
+import type { ILintResult, IViolation } from './types.ts';
 
 const failed: ILintResult = {
   passed: false,
@@ -14,6 +14,8 @@ const failed: ILintResult = {
       column: 1,
       directive: 'eslint-disable',
       tool: 'eslint',
+      rule: 'missingReason',
+      severity: 'error',
       message: 'unjustified eslint-disable',
     },
     {
@@ -22,6 +24,8 @@ const failed: ILintResult = {
       column: 3,
       directive: 'stylelint-disable',
       tool: 'stylelint',
+      rule: 'missingReason',
+      severity: 'error',
       message: 'unjustified stylelint-disable',
     },
   ],
@@ -51,5 +55,44 @@ describe('format', () => {
       scanned: failed.scanned,
       violations: failed.violations,
     });
+  });
+
+  const error: IViolation = {
+    path: 'a.ts',
+    line: 1,
+    column: 1,
+    directive: 'eslint-disable',
+    tool: 'eslint',
+    rule: 'missingReason',
+    severity: 'error',
+    message: 'msg',
+  };
+  const warning: IViolation = { ...error, rule: 'expired', severity: 'warn' };
+
+  it('renders a lone error exactly as before', () => {
+    expect(format({ passed: false, scanned: 1, violations: [error] })).toBe(
+      '\n✖ a.ts:1:1  msg\n\n1 unjustified disable directive(s) found.\n'
+    );
+  });
+
+  it('renders a warning with the pass line and a warning count', () => {
+    expect(format({ passed: true, scanned: 3, violations: [warning] })).toBe(
+      '\n⚠ a.ts:1:1  msg\n\n✔ No unjustified disable directives (3 files scanned).\n1 warning(s).\n'
+    );
+  });
+
+  it('counts errors and warnings separately', () => {
+    expect(format({ passed: false, scanned: 3, violations: [error, warning, warning] })).toMatch(
+      /1 unjustified disable directive\(s\) found\.\n2 warning\(s\)\.\n$/
+    );
+  });
+
+  it('includes rule and severity in JSON violations', () => {
+    const parsed = JSON.parse(
+      format({ passed: true, scanned: 1, violations: [warning] }, true)
+    ) as ILintResult;
+    const [violation] = parsed.violations;
+
+    expect(violation).toMatchObject({ rule: 'expired', severity: 'warn' });
   });
 });

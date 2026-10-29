@@ -1,7 +1,7 @@
 {
   "name": "@ladamczyk/justify-disable",
   "version": "0.0.0",
-  "description": "CLI that requires a justification for every lint disable comment",
+  "description": "CLI that requires a justification for every lint disable comment, heavily inspired by unicorn's expiring-todo-comments",
   "keywords": [
     "cli"
   ],
@@ -44,7 +44,8 @@
     "@ladamczyk/qoq-utils": "6.4.2",
     "cac": "7.1.0",
     "cosmiconfig": "10.0.1",
-    "picocolors": "1.1.1"
+    "picocolors": "1.1.1",
+    "semver": "7.8.5"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.4",
@@ -55,6 +56,7 @@
     "@ladamczyk/qoq-knip": "6.4.2",
     "@ladamczyk/qoq-prettier-with-json-sort": "6.4.2",
     "@types/node": "^22",
+    "@types/semver": "7.8.0",
     "@vitest/coverage-v8": "5.0.5",
     "dotenv": "18.0.9",
     "husky": "9.1.7",
