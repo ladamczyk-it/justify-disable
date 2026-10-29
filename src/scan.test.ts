@@ -41,6 +41,15 @@ describe('scanSource', () => {
     });
   });
 
+  it.each(['// @todo', '// @todo [2999-01-01]'])(
+    'reports a @todo without a reason: %s',
+    (comment) => {
+      expect(scanEslint(`${comment}\n// ${directive}`)).toMatchObject([
+        { rule: 'missingReason', message: 'eslint-disable-next-line has a @todo without a reason' },
+      ]);
+    }
+  );
+
   it('reports an unjustified directive on line 1', () => {
     expect(scanEslint(`// ${directive}`)).toStrictEqual([
       {

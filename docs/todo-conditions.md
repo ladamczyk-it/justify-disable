@@ -14,7 +14,7 @@ const response: any = await legacyCall();
 
 - The bracket follows the first `@todo` in the comment, with spaces or tabs allowed between them. It must fit on one line: a `[` with no `]` before the end of that line reports one `invalidCondition` ("condition list must fit on one line").
 - Tokens are separated by commas and trimmed.
-- Prose must still follow the bracket. `@todo [2030-01-01]` on its own has no reason and is reported as `missingReason`.
+- Prose must still follow the bracket. `@todo [2030-01-01]` on its own has no reason and is reported as `missingReason` ("has a @todo without a reason").
 
 ## Condition kinds
 

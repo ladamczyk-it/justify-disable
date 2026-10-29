@@ -103,6 +103,20 @@ const toViolation = (
   return severity === 'off' ? [] : [{ ...location, ...finding, severity }];
 };
 
+const missingReasonMessage = (
+  directive: string,
+  comment: string | undefined,
+  isDefaultReason: boolean
+): string => {
+  if (!isDefaultReason) {
+    return `${directive} has no reason above it`;
+  }
+  // A `@todo` that failed the default regex is there but bare or condition-only.
+  return comment?.includes('@todo')
+    ? `${directive} has a @todo without a reason`
+    : `${directive} has no @todo reason above it`;
+};
+
 export const scanSource = (
   source: string,
   path: string,
@@ -116,10 +130,8 @@ export const scanSource = (
   for (const tool of toolNames) {
     const { directive, reason } = tools[tool]!;
     // Identity, not source equality: resolveConfig returns an untouched default `reason` as-is so this still matches.
-    const message =
-      reason === (DEFAULT_TOOLS as Record<string, IToolDirectives>)[tool]?.reason
-        ? ' @todo reason'
-        : ' reason';
+    const isDefaultReason =
+      reason === (DEFAULT_TOOLS as Record<string, IToolDirectives>)[tool]?.reason;
     for (const match of source.matchAll(directive)) {
       lineStarts ??= findLineStarts(source);
       const lineIndex = findLineIndex(lineStarts, match.index);
@@ -127,7 +139,12 @@ export const scanSource = (
       const findings =
         comment !== undefined && reason.test(comment)
           ? findConditionProblems(comment, match[1]!, readPackageJson)
-          : [{ rule: 'missingReason' as const, message: `${match[1]!} has no${message} above it` }];
+          : [
+              {
+                rule: 'missingReason' as const,
+                message: missingReasonMessage(match[1]!, comment, isDefaultReason),
+              },
+            ];
       const location = {
         path,
         line: lineIndex + 1,
