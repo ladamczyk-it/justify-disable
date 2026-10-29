@@ -1,5 +1,5 @@
-import { readFileSync, writeFileSync } from 'fs';
-import { createInterface } from 'readline/promises';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { createInterface } from 'node:readline/promises';
 
 import { sendStats as send, STATS_URL, PIXEL_URL } from '@ladamczyk/qoq-utils';
 import c from 'picocolors';
@@ -101,8 +101,8 @@ export const resolveConsent = async (ask: boolean = true): Promise<boolean | und
   return stats;
 };
 
-// Package-internal: `lint()` is the only caller, so consent is checked in exactly
-// one place. Transport — both endpoints, the shared 2s cap, the swallowed
+// Package-internal: called by `lint()` when its caller passes `stats: true`, and
+// by the CLI once `resolveConsent` says yes. Transport — both endpoints, the shared 2s cap, the swallowed
 // failures — is qoq-utils', so a URL changes in one place for every tool that
 // counts runs; all that is bound here is the name.
 //
