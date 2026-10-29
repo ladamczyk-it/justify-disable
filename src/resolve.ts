@@ -35,7 +35,9 @@ const assertKnownTools = (names: string[], tools: Record<string, IToolDirectives
 
 const SEVERITIES: readonly string[] = ['error', 'warn', 'off'];
 
-const resolveRules = (rules: IJustifyDisableConfig['rules'] = {}) => {
+const resolveRules = (
+  rules: IJustifyDisableConfig['rules'] = {}
+): Record<TRuleName, TRuleSeverity> => {
   for (const [name, severity] of Object.entries(rules)) {
     if (!Object.hasOwn(DEFAULT_RULES, name)) {
       throw new Error(`unknown rule "${name}"`);
