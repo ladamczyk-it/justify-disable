@@ -11,14 +11,13 @@ export default {
     entry: ['./src/index.{js,ts}', './src/cli.{js,ts}'],
     project: './src/**/*.{js,ts}',
     ignore: ['**/rolldown.config.js', '**/vitest.config.js', 'eslint.config.js', 'qoq.config.js'],
-    ignoreDependencies: [
-      'rolldown',
-      'dotenv',
-      '@commitlint/cli',
-      '@ladamczyk/qoq-utils',
-      'picocolors',
-      'cac',
-    ],
+    ignoreDependencies: ['rolldown', 'dotenv', '@commitlint/cli'],
   },
   eslint: [{ template: 'qoq-eslint-v9-ts', files: ['src/**/*.ts'], rules }],
+  future: {
+    unstable_skill_docs: true,
+    unstable_skill_diagrams: true,
+    unstable_skill_sheriff: true,
+    unstable_skill_review: true,
+  },
 };
