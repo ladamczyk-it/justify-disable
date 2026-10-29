@@ -1,0 +1,15 @@
+/* Every directive below is justified: justify-disable reports nothing for this file. */
+
+/* @todo Vendor prefix needed until Safari is on the supported list. */
+/* stylelint-disable-next-line property-no-vendor-prefix */
+.button {
+  -webkit-appearance: none;
+}
+
+/**
+ * @todo [2999-01-01] Drop the override once the redesign ships.
+ */
+/* stylelint-disable-next-line declaration-no-important */
+.banner {
+  color: red !important;
+}

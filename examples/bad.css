@@ -1,0 +1,24 @@
+/* Every directive below is reported. */
+
+/* stylelint-disable-next-line declaration-no-important */
+.no-reason {
+  color: red !important;
+}
+
+/* @todo [2999-01-01] */
+/* stylelint-disable-next-line declaration-no-important */
+.conditions-only {
+  color: red !important;
+}
+
+/* @todo [2020-01-01] The redesign shipped; this override is overdue. */
+/* stylelint-disable-next-line declaration-no-important */
+.expired {
+  color: red !important;
+}
+
+/* @todo [not-a-condition] An unrecognised token is reported. */
+/* stylelint-disable-next-line declaration-no-important */
+.invalid {
+  color: red !important;
+}
