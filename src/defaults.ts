@@ -10,11 +10,11 @@ export const DEFAULT_RULES: Record<TRuleName, TRuleSeverity> = {
 export const DEFAULT_TOOLS: Record<'eslint' | 'stylelint', IToolDirectives> = {
   eslint: {
     directive: /(?:\/\/|\/\*)\s*(eslint-disable(?:-next-line|-line)?)(?=\s|\*\/|$)/gm,
-    reason: /@todo[ \t]+[^\s*]/,
+    reason: /@todo(?:[ \t]*\[[^\]]*\])?[ \t]+[^\s*[]/,
   },
   stylelint: {
     directive: /(?:\/\/|\/\*)\s*(stylelint-disable(?:-next-line|-line)?)(?=\s|\*\/|$)/gm,
-    reason: /^\/\*[\s\S]*?@todo[ \t]+[^\s*]/,
+    reason: /^\/\*[\s\S]*?@todo(?:[ \t]*\[[^\]]*\])?[ \t]+[^\s*[]/,
   },
 };
 export const DEFAULT_EXTENSIONS: Record<string, string[]> = {

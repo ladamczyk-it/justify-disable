@@ -100,6 +100,34 @@ describe('scanSource', () => {
     expect(scanStylelint(`// @todo brand palette\n${line}`)).toHaveLength(1);
   });
 
+  it('flags a condition list with no reason after it', () => {
+    expect(scanEslint(`// @todo [2027-01-01]\n// ${directive}`)).toHaveLength(1);
+  });
+
+  it('flags an unspaced condition list with no reason after it', () => {
+    expect(scanEslint(`// @todo[2027-01-01]\n// ${directive}`)).toHaveLength(1);
+  });
+
+  it.each([
+    ['spaced condition with a reason', '// @todo [2027-01-01] drop it'],
+    ['unspaced condition with a reason', '// @todo[2027-01-01] drop it'],
+    ['bare reason', '// @todo drop it'],
+  ])('accepts a %s above', (_name, comment) => {
+    expect(scanEslint(`${comment}\n// ${directive}`)).toStrictEqual([]);
+  });
+
+  it('flags a block comment condition list with no reason for stylelint', () => {
+    const line = '/* stylelint-disable-next-line color-no-hex */';
+
+    expect(scanStylelint(`/* @todo [2027-01-01] */\n${line}`)).toHaveLength(1);
+  });
+
+  it('accepts a block comment condition list followed by a reason for stylelint', () => {
+    const line = '/* stylelint-disable-next-line color-no-hex */';
+
+    expect(scanStylelint(`/* @todo [2027-01-01] drop it */\n${line}`)).toStrictEqual([]);
+  });
+
   it('reports each tool of a multi-tool file', () => {
     const source = '// eslint-disable-next-line x\na();\n/* stylelint-disable */';
     const violations = scanSource(
