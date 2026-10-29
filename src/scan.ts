@@ -58,6 +58,7 @@ export const scanSource = (
   let lineStarts: number[] | undefined;
   for (const tool of toolNames) {
     const { directive, reason } = tools[tool]!;
+    // Identity, not source equality: resolveConfig returns an untouched default `reason` as-is so this still matches.
     const message =
       reason === (DEFAULT_TOOLS as Record<string, IToolDirectives>)[tool]?.reason
         ? ' @todo reason'
