@@ -1,13 +1,41 @@
 import { describe, expect, it } from 'vitest';
 
-import { DEFAULT_EXTENSIONS, DEFAULT_TOOLS } from './defaults.ts';
+import { DEFAULT_EXTENSIONS, DEFAULT_RULES, DEFAULT_TOOLS } from './defaults.ts';
 import { scanSource } from './scan.ts';
 
-const scanEslint = (source: string) => scanSource(source, 'a.ts', ['eslint'], DEFAULT_TOOLS);
-const scanStylelint = (source: string) => scanSource(source, 'a.css', ['stylelint'], DEFAULT_TOOLS);
+const scanEslint = (source: string) =>
+  scanSource(source, 'a.ts', ['eslint'], DEFAULT_TOOLS, DEFAULT_RULES);
+const scanStylelint = (source: string) =>
+  scanSource(source, 'a.css', ['stylelint'], DEFAULT_TOOLS, DEFAULT_RULES);
 const directive = 'eslint-disable-next-line no-console\nfoo();';
 
 describe('scanSource', () => {
+  describe('missingReason severity', () => {
+    const scanWith = (missingReason: 'error' | 'warn' | 'off') =>
+      scanSource('// eslint-disable-next-line\nx', 'a.ts', ['eslint'], DEFAULT_TOOLS, {
+        ...DEFAULT_RULES,
+        missingReason,
+      });
+
+    it('reports error by default', () => {
+      expect(scanWith('error')).toMatchObject([
+        {
+          rule: 'missingReason',
+          severity: 'error',
+          message: 'eslint-disable-next-line has no @todo reason above it',
+        },
+      ]);
+    });
+
+    it('reports warn when configured', () => {
+      expect(scanWith('warn')).toMatchObject([{ rule: 'missingReason', severity: 'warn' }]);
+    });
+
+    it('reports nothing when off', () => {
+      expect(scanWith('off')).toStrictEqual([]);
+    });
+  });
+
   it('reports an unjustified directive on line 1', () => {
     expect(scanEslint(`// ${directive}`)).toStrictEqual([
       {
@@ -74,7 +102,13 @@ describe('scanSource', () => {
 
   it('reports each tool of a multi-tool file', () => {
     const source = '// eslint-disable-next-line x\na();\n/* stylelint-disable */';
-    const violations = scanSource(source, 'a.vue', ['eslint', 'stylelint'], DEFAULT_TOOLS);
+    const violations = scanSource(
+      source,
+      'a.vue',
+      ['eslint', 'stylelint'],
+      DEFAULT_TOOLS,
+      DEFAULT_RULES
+    );
 
     expect(violations.map(({ tool }) => tool)).toStrictEqual(['eslint', 'stylelint']);
   });
@@ -82,7 +116,7 @@ describe('scanSource', () => {
   it('uses the generic message for a custom reason', () => {
     const tools = { custom: { directive: /(?:\/\/)\s*(custom-off)/g, reason: /why:/ } };
 
-    expect(scanSource('// custom-off', 'a.ts', ['custom'], tools)[0]?.message).toBe(
+    expect(scanSource('// custom-off', 'a.ts', ['custom'], tools, DEFAULT_RULES)[0]?.message).toBe(
       'custom-off has no reason above it'
     );
   });

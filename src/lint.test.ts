@@ -64,6 +64,14 @@ describe('lint in a git repo', () => {
     });
   });
 
+  it('passes with a warn-level violation', async () => {
+    git('init', '-q');
+    await write('src/a.ts', UNJUSTIFIED);
+    const result = await lint({ config: { rules: { missingReason: 'warn' } }, stats: false });
+    expect(result.passed).toBe(true);
+    expect(result.violations).toMatchObject([{ severity: 'warn' }]);
+  });
+
   it('passes when every directive is justified', async () => {
     git('init', '-q');
     await write(

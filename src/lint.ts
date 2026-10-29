@@ -29,7 +29,7 @@ export const lint = async (options: ILintOptions): Promise<ILintResult> => {
       const { path, tools } = files[index]!;
       try {
         const source = await readFile(resolve(process.cwd(), path), 'utf8');
-        results[index] = scanSource(source, path, tools, resolved.tools);
+        results[index] = scanSource(source, path, tools, resolved.tools, resolved.rules);
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
           throw error;
@@ -43,5 +43,9 @@ export const lint = async (options: ILintOptions): Promise<ILintResult> => {
   const violations = read
     .flat()
     .toSorted((a, b) => a.path.localeCompare(b.path) || a.line - b.line || a.column - b.column);
-  return { passed: violations.length === 0, scanned: read.length, violations };
+  return {
+    passed: !violations.some(({ severity }) => severity === 'error'),
+    scanned: read.length,
+    violations,
+  };
 };

@@ -1,6 +1,6 @@
 import { DEFAULT_TOOLS } from './defaults.ts';
 
-import type { IToolDirectives, IViolation } from './types.ts';
+import type { IToolDirectives, IViolation, TRuleName, TRuleSeverity } from './types.ts';
 
 const findLineStarts = (source: string): number[] => {
   const lineStarts = [0];
@@ -52,9 +52,14 @@ export const scanSource = (
   source: string,
   path: string,
   toolNames: string[],
-  tools: Record<string, IToolDirectives>
+  tools: Record<string, IToolDirectives>,
+  rules: Record<TRuleName, TRuleSeverity>
 ): IViolation[] => {
+  const severity = rules.missingReason;
   const violations: IViolation[] = [];
+  if (severity === 'off') {
+    return violations;
+  }
   let lineStarts: number[] | undefined;
   for (const tool of toolNames) {
     const { directive, reason } = tools[tool]!;
@@ -77,7 +82,7 @@ export const scanSource = (
         directive: match[1]!,
         tool,
         rule: 'missingReason',
-        severity: 'error',
+        severity,
         message: `${match[1]!} has no${message} above it`,
       });
     }
