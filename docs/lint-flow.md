@@ -24,13 +24,13 @@ User tools merge by key over the defaults, and extension entries replace per key
 
 > Source: documented from plan
 
-A directive counts as justified only if the comment that ends on the line directly above it matches the tool's `reason`. A conditions-only `@todo [..]` is not a reason; prose must follow the condition list. Only that one line is examined, so with stacked comments the nearest decides, and a same-line `-- reason` never counts. Stylelint's default reason must sit in a block comment. Accepted limits: directives inside strings match, delimiters inside strings on the line above can misread the comment, and overlapping tool regexes report twice.
+A directive counts as justified only if the comment that ends on the line directly above it matches the tool's `reason`. A conditions-only `@todo [..]` is not a reason; prose must follow the condition list. The default `reason` regexes let the bracket body span lines (stopping at the next `@todo`) so a multi-line list still counts as a reason and the condition parser, not `missingReason`, reports it. Only that one line is examined, so with stacked comments the nearest decides, and a same-line `-- reason` never counts. Stylelint's default reason must sit in a block comment. Accepted limits: directives inside strings match, delimiters inside strings on the line above can misread the comment, and overlapping tool regexes report twice.
 
 ## Conditions and the package.json lookup
 
 > Source: inferred from code
 
-Once the comment above passes the `reason` test, its `@todo [..]` conditions are parsed and evaluated (see [Todo conditions](todo-conditions.md)); a directive that fails the reason test reports only `missingReason` and its conditions are not looked at. `lint()` creates one package.json lookup per run and hands each file a thunk, so a package.json is read only when a condition of that file needs one (date conditions never do). The lookup walks up from the file's directory and caches per directory, so concurrent workers share reads. Unparsable JSON throws and fails the whole run.
+Once the comment above passes the `reason` test, its `@todo [..]` conditions are parsed and evaluated (see [Todo conditions](todo-conditions.md)); a directive that fails the reason test reports only `missingReason` and its conditions are not looked at. `lint()` creates one package.json lookup per run and hands each file a thunk, so a package.json is read only when a condition of that file needs one (date conditions never do). A `[` after `@todo` that has no `]` on that line yields one `invalidCondition` ("condition list must fit on one line"), and a range matching every version, including `>=0.0.0`, is invalid. `missingDate` fires only when the comment contains `@todo`, so a custom `reason` without `@todo` never triggers it. The lookup walks up from the file's directory and caches per directory, so concurrent workers share reads. Unparsable JSON throws and fails the whole run.
 
 ## Concurrency
 

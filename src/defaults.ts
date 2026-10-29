@@ -9,6 +9,9 @@ export const DEFAULT_RULES: Record<TRuleName, TRuleSeverity> = {
 };
 // The reason regexes accept an optional `[condition]` after `@todo` but require prose after it
 // (`[^\s*[]`), so a condition list alone is not a reason.
+// The reason regexes' bracket body may cross newlines (unlike CONDITION_LIST in todo.ts) so a
+// multi-line list still passes as a reason and parseConditions reports it; `@(?!todo)` keeps it linear.
+// scan.ts compares these by identity for message wording: never clone them.
 export const DEFAULT_TOOLS: Record<'eslint' | 'stylelint', IToolDirectives> = {
   eslint: {
     directive: /(?:\/\/|\/\*)\s*(eslint-disable(?:-next-line|-line)?)(?=\s|\*\/|$)/gm,

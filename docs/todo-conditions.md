@@ -12,7 +12,7 @@ justify-disable's `@todo` conditions are heavily inspired by unicorn's [`expirin
 const response: any = await legacyCall();
 ```
 
-- The bracket follows the first `@todo` in the comment, with spaces or tabs allowed between them. It must fit on one line.
+- The bracket follows the first `@todo` in the comment, with spaces or tabs allowed between them. It must fit on one line: a `[` with no `]` before the end of that line reports one `invalidCondition` ("condition list must fit on one line").
 - Tokens are separated by commas and trimmed.
 - Prose must still follow the bracket. `@todo [2030-01-01]` on its own has no reason and is reported as `missingReason`.
 
@@ -47,7 +47,7 @@ src/app.ts:12:1  eslint-disable-next-line has an invalid @todo condition [react@
 | a date that is not a real calendar day, such as `2030-02-30`                                               | `not a real calendar date`                                |
 | a second date in one bracket                                                                               | `only one date condition is allowed`                      |
 | a second own-version range in one bracket                                                                  | `only one version condition is allowed`                   |
-| a range that matches every version, such as `*` or `x`                                                     | `"<range>" matches every version`                         |
+| a range that matches every version, such as `*`, `x` or `>=0.0.0`                                          | `"<range>" matches every version`                         |
 | a token that is not a semver range                                                                         | `"<token>" is not a valid semver range`                   |
 | a dependency that is not declared                                                                          | `<name> is not declared in package.json`                  |
 | a declared dependency range semver cannot read, such as `workspace:*`, `file:`, git URLs or `npm:` aliases | `<name> range "<declared>" is not a semver range`         |
