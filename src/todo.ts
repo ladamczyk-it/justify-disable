@@ -13,6 +13,7 @@ export type TCondition =
 // The body skips `@` only when it starts another `@todo`: keeps the scan linear and
 // lets `name@range` tokens through.
 const CONDITION_LIST = /[ \t]*\[((?:[^\]\n@]|@(?!todo))*)\]/y;
+const CONDITION_LIST_OPENER = /[ \t]*\[/y;
 interface ISeen {
   date: boolean;
   version: boolean;
@@ -31,9 +32,7 @@ const rangeProblem = (range: string): string | null => {
   if (semver.validRange(range) === null) {
     return `"${range}" is not a valid semver range`;
   }
-  return semver.subset('*', range, { includePrerelease: true })
-    ? `"${range}" matches every version`
-    : null;
+  return semver.subset('*', range) ? `"${range}" matches every version` : null;
 };
 
 const classifyDate = (token: string, seen: ISeen): TCondition => {
@@ -78,11 +77,7 @@ const classify = (token: string, seen: ISeen): TCondition => {
   if (ISO_DATE.test(token)) {
     return classifyDate(token, seen);
   }
-  if (
-    (token.startsWith('+') || token.startsWith('-')) &&
-    token.length > 1 &&
-    !ENGINE_TOKEN.test(token)
-  ) {
+  if ((token.startsWith('+') || token.startsWith('-')) && token.length > 1) {
     return { kind: token.startsWith('+') ? 'added' : 'removed', token, name: token.slice(1) };
   }
   return classifyRanged(token, seen);
@@ -93,10 +88,14 @@ export const parseConditions = (comment: string): TCondition[] => {
   if (tag === -1) {
     return [];
   }
-  CONDITION_LIST.lastIndex = tag + '@todo'.length;
+  const listStart = tag + '@todo'.length;
+  CONDITION_LIST.lastIndex = listStart;
   const match = CONDITION_LIST.exec(comment);
   if (!match) {
-    return [];
+    CONDITION_LIST_OPENER.lastIndex = listStart;
+    return CONDITION_LIST_OPENER.test(comment)
+      ? [{ kind: 'invalid', token: '', detail: 'condition list must fit on one line' }]
+      : [];
   }
   const seen = { date: false, version: false };
   return (match[1] ?? '').split(',').map((token) => classify(token.trim(), seen));

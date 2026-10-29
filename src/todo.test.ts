@@ -63,7 +63,9 @@ describe('parseConditions', () => {
   });
 
   it('does not let a bracket body cross a newline', () => {
-    expect(parseConditions('// @todo [2027-01-01\n// ] r')).toStrictEqual([]);
+    expect(parseConditions('// @todo [2027-01-01\n// ] r')).toStrictEqual([
+      { kind: 'invalid', token: '', detail: 'condition list must fit on one line' },
+    ]);
   });
 });
 
@@ -180,5 +182,32 @@ describe('evaluateCondition', () => {
 
   it('engine ignores inherited members', () => {
     expect(evaluate(engine('constructor', '>1'), { engines: {} }).status).toBe('invalid');
+  });
+});
+
+describe('parseConditions parser fixes', () => {
+  const multiLine = [{ kind: 'invalid', token: '', detail: 'condition list must fit on one line' }];
+
+  it('flags a bracket closed on a later line', () => {
+    expect(parseConditions('/**\n * @todo [2020-01-01,\n *   +lodash] r\n */')).toStrictEqual(
+      multiLine
+    );
+  });
+
+  it('flags a bracket that is never closed', () => {
+    expect(parseConditions('// @todo [2020-01-01 r')).toStrictEqual(multiLine);
+  });
+
+  it('rejects >=0.0.0 as matching every version', () => {
+    expect(kinds('// @todo [>=0.0.0] r')).toStrictEqual(['invalid']);
+    expect(kinds('// @todo [lodash@>=0.0.0] r')).toStrictEqual(['invalid']);
+  });
+
+  it('keeps +name and -name as added and removed', () => {
+    const conditions = parseConditions('// @todo [>=1, +lodash, -left-pad] r');
+
+    expect(conditions.map(({ kind }) => kind)).toStrictEqual(['version', 'added', 'removed']);
+    expect(conditions[1]).toMatchObject({ name: 'lodash' });
+    expect(conditions[2]).toMatchObject({ name: 'left-pad' });
   });
 });
