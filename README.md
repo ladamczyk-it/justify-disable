@@ -79,11 +79,11 @@ justify-disable -h               # list all options
 | `--json`            | —       | Emit machine-readable JSON instead of text |
 | `--concurrency <n>` | `64`    | Files read in parallel (positive integer)  |
 
-| Exit code | Meaning                                         |
-| --------- | ----------------------------------------------- |
-| `0`       | No unjustified directives                       |
-| `1`       | At least one `error`-severity violation         |
-| `2`       | Any error (bad config, not a git repository, …) |
+| Exit code | Meaning                                                  |
+| --------- | -------------------------------------------------------- |
+| `0`       | No `error`-severity violations (warnings may be printed) |
+| `1`       | At least one `error`-severity violation                  |
+| `2`       | Any error (bad config, not a git repository, …)          |
 
 ## Config
 
@@ -201,7 +201,7 @@ import { lint, format } from '@ladamczyk/justify-disable';
 
 const result = await lint({ paths: ['src'], stats: false });
 
-result.passed; // boolean, no violations
+result.passed; // boolean, false only when a violation has error severity
 result.scanned; // number of files read
 result.violations; // Array<{ path, line, column, directive, tool, rule, severity, message }>
 

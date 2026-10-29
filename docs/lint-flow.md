@@ -1,4 +1,4 @@
-<!-- qoq-scribe sources: src/lint.ts src/resolve.ts src/provider.ts src/scan.ts src/defaults.ts src/types.ts src/config.ts -->
+<!-- qoq-scribe sources: src/lint.ts src/resolve.ts src/provider.ts src/scan.ts src/defaults.ts src/types.ts src/config.ts src/todo.ts src/package.ts -->
 
 # Lint flow
 
@@ -18,13 +18,19 @@ The default provider asks git (`ls-files --cached --others --exclude-standard`),
 
 > Source: documented from plan
 
-User tools merge by key over the defaults, and extension entries replace per key. Regexes are cloned, never mutated: `directive` gains `g`, `reason` loses `g`/`y`. A default `reason` is deliberately left identical so the scanner can pick the "@todo" wording of the message by identity. Ignore patterns without `/` match at any depth. `rules` merge by key over `DEFAULT_RULES`; a rule set to `off` emits nothing (`scanSource` returns early for `missingReason`). An unknown tool name, an unknown rule name, a severity other than `error`/`warn`/`off`, a non-positive-integer concurrency, or an absolute provider path throws.
+User tools merge by key over the defaults, and extension entries replace per key. Regexes are cloned, never mutated: `directive` gains `g`, `reason` loses `g`/`y`. A default `reason` is deliberately left identical so the scanner can pick the "@todo" wording of the message by identity. Ignore patterns without `/` match at any depth. `rules` merge by key over `DEFAULT_RULES`; a finding whose rule is set to `off` is dropped when it becomes a violation (`toViolation`), so `off` never stops other checks on the same directive. An unknown tool name, an unknown rule name, a severity other than `error`/`warn`/`off`, a non-positive-integer concurrency, or an absolute provider path throws.
 
 ## Scanning a file
 
 > Source: documented from plan
 
 A directive counts as justified only if the comment that ends on the line directly above it matches the tool's `reason`. A conditions-only `@todo [..]` is not a reason; prose must follow the condition list. Only that one line is examined, so with stacked comments the nearest decides, and a same-line `-- reason` never counts. Stylelint's default reason must sit in a block comment. Accepted limits: directives inside strings match, delimiters inside strings on the line above can misread the comment, and overlapping tool regexes report twice.
+
+## Conditions and the package.json lookup
+
+> Source: inferred from code
+
+Once the comment above passes the `reason` test, its `@todo [..]` conditions are parsed and evaluated (see [Todo conditions](todo-conditions.md)); a directive that fails the reason test reports only `missingReason` and its conditions are not looked at. `lint()` creates one package.json lookup per run and hands each file a thunk, so a package.json is read only when a condition of that file needs one (date conditions never do). The lookup walks up from the file's directory and caches per directory, so concurrent workers share reads. Unparsable JSON throws and fails the whole run.
 
 ## Concurrency
 
