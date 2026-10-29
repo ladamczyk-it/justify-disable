@@ -1,21 +1,26 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { DEFAULT_EXTENSIONS, DEFAULT_RULES, DEFAULT_TOOLS } from './defaults.ts';
 import { scanSource } from './scan.ts';
 
+const noPackageJson = () => null;
 const scanEslint = (source: string) =>
-  scanSource(source, 'a.ts', ['eslint'], DEFAULT_TOOLS, DEFAULT_RULES);
+  scanSource(source, 'a.ts', ['eslint'], DEFAULT_TOOLS, DEFAULT_RULES, noPackageJson);
 const scanStylelint = (source: string) =>
-  scanSource(source, 'a.css', ['stylelint'], DEFAULT_TOOLS, DEFAULT_RULES);
+  scanSource(source, 'a.css', ['stylelint'], DEFAULT_TOOLS, DEFAULT_RULES, noPackageJson);
 const directive = 'eslint-disable-next-line no-console\nfoo();';
 
 describe('scanSource', () => {
   describe('missingReason severity', () => {
     const scanWith = (missingReason: 'error' | 'warn' | 'off') =>
-      scanSource('// eslint-disable-next-line\nx', 'a.ts', ['eslint'], DEFAULT_TOOLS, {
-        ...DEFAULT_RULES,
-        missingReason,
-      });
+      scanSource(
+        '// eslint-disable-next-line\nx',
+        'a.ts',
+        ['eslint'],
+        DEFAULT_TOOLS,
+        { ...DEFAULT_RULES, missingReason },
+        noPackageJson
+      );
 
     it('reports error by default', () => {
       expect(scanWith('error')).toMatchObject([
@@ -135,7 +140,8 @@ describe('scanSource', () => {
       'a.vue',
       ['eslint', 'stylelint'],
       DEFAULT_TOOLS,
-      DEFAULT_RULES
+      DEFAULT_RULES,
+      noPackageJson
     );
 
     expect(violations.map(({ tool }) => tool)).toStrictEqual(['eslint', 'stylelint']);
@@ -144,9 +150,10 @@ describe('scanSource', () => {
   it('uses the generic message for a custom reason', () => {
     const tools = { custom: { directive: /(?:\/\/)\s*(custom-off)/g, reason: /why:/ } };
 
-    expect(scanSource('// custom-off', 'a.ts', ['custom'], tools, DEFAULT_RULES)[0]?.message).toBe(
-      'custom-off has no reason above it'
-    );
+    expect(
+      scanSource('// custom-off', 'a.ts', ['custom'], tools, DEFAULT_RULES, noPackageJson)[0]
+        ?.message
+    ).toBe('custom-off has no reason above it');
   });
 
   it('gives CRLF sources the same verdicts as LF', () => {
@@ -155,6 +162,93 @@ describe('scanSource', () => {
 
     expect(scanEslint(crlf)).toStrictEqual(scanEslint(source));
     expect(scanEslint(crlf)).toMatchObject([{ line: 4, column: 3 }]);
+  });
+});
+
+describe('scanSource conditions', () => {
+  const scanWithRules = (
+    source: string,
+    rules: Partial<typeof DEFAULT_RULES>,
+    readPackageJson: () => null = noPackageJson
+  ) =>
+    scanSource(
+      source,
+      'a.ts',
+      ['eslint'],
+      DEFAULT_TOOLS,
+      { ...DEFAULT_RULES, ...rules },
+      readPackageJson
+    );
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-10-29T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('reports an expired date condition', () => {
+    expect(scanEslint(`// @todo [2020-01-01] r\n// ${directive}`)).toMatchObject([
+      {
+        rule: 'expired',
+        severity: 'error',
+        message: 'eslint-disable-next-line has an expired @todo condition [2020-01-01]',
+      },
+    ]);
+  });
+
+  it('reports an invalid condition with its detail', () => {
+    const violations = scanEslint(`// @todo [2999-01-01, foo bar] r\n// ${directive}`);
+
+    expect(violations).toHaveLength(1);
+    expect(violations[0]?.rule).toBe('invalidCondition');
+    expect(violations[0]?.message).toMatch(
+      /^eslint-disable-next-line has an invalid @todo condition \[foo bar\]: /
+    );
+  });
+
+  it('reports a @todo without a date when missingDate is on', () => {
+    expect(scanWithRules(`// @todo r\n// ${directive}`, { missingDate: 'error' })).toMatchObject([
+      {
+        rule: 'missingDate',
+        message: 'eslint-disable-next-line has a @todo without a date condition',
+      },
+    ]);
+  });
+
+  it('ignores a missing date with the default rules', () => {
+    expect(scanEslint(`// @todo r\n// ${directive}`)).toStrictEqual([]);
+  });
+
+  it('reports only missingReason when there is no comment above', () => {
+    expect(
+      scanWithRules(`// ${directive}`, { missingDate: 'error' }).map(({ rule }) => rule)
+    ).toStrictEqual(['missingReason']);
+  });
+
+  it('still checks conditions when missingReason is off', () => {
+    expect(
+      scanWithRules(`// @todo [2020-01-01] r\n// ${directive}`, { missingReason: 'off' }).map(
+        ({ rule }) => rule
+      )
+    ).toStrictEqual(['expired']);
+  });
+
+  it('reports conditions in bracket order, then missingDate', () => {
+    expect(
+      scanWithRules(`// @todo [foo bar, +lodash] r\n// ${directive}`, { missingDate: 'warn' }).map(
+        ({ rule, severity }) => `${rule}:${severity}`
+      )
+    ).toStrictEqual(['invalidCondition:error', 'invalidCondition:error', 'missingDate:warn']);
+  });
+
+  it('never reads package.json for a date-only condition', () => {
+    const readPackageJson = vi.fn(noPackageJson);
+    scanWithRules(`// @todo [2999-01-01] r\n// ${directive}`, {}, readPackageJson);
+
+    expect(readPackageJson).not.toHaveBeenCalled();
   });
 });
 
