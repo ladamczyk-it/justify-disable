@@ -80,7 +80,10 @@ export const selectFiles = (
     if (explicit) {
       assertKnownTools(explicit, resolved.tools);
     }
-    const tools = explicit ?? resolved.extensions[extname(path).slice(1).toLowerCase()];
+    const extension = extname(path).slice(1).toLowerCase();
+    const tools =
+      explicit ??
+      (Object.hasOwn(resolved.extensions, extension) ? resolved.extensions[extension] : undefined);
     if (tools) {
       selected.push({ path, tools });
     }

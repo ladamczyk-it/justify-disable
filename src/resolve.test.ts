@@ -1,6 +1,11 @@
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join, relative } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
 import { DEFAULT_CONCURRENCY, DEFAULT_EXTENSIONS, DEFAULT_TOOLS } from './defaults.ts';
+import { lint } from './lint.ts';
 import { resolveConfig, selectFiles } from './resolve.ts';
 
 const tsTool = { directive: /\/\/\s*(@ts-ignore)/, reason: /@todo[ \t]+\S/g };
@@ -113,5 +118,35 @@ describe('selectFiles', () => {
     expect(() => selectFiles([{ path: '/abs/a.ts' }], resolved)).toThrow(
       'provider returned an absolute path: /abs/a.ts'
     );
+  });
+
+  it('drops extensions naming inherited Object members as unmapped', () => {
+    expect(
+      selectFiles(
+        [
+          { path: 'x.constructor' },
+          { path: 'x.__proto__' },
+          { path: 'x.toString' },
+          { path: 'README.md' },
+        ],
+        resolved
+      )
+    ).toStrictEqual([]);
+  });
+
+  it('lint resolves clean for a provided file with an inherited-member extension', async () => {
+    // the file must exist, or lint skips it as deleted and never reaches the lookup
+    const directory = await mkdtemp(join(tmpdir(), 'justify-disable-'));
+    try {
+      const file = join(directory, 'x.constructor');
+      await writeFile(file, '// eslint-disable-next-line');
+      const path = relative(process.cwd(), file);
+
+      await expect(
+        lint({ stats: false, config: { provider: () => [{ path }] } })
+      ).resolves.toStrictEqual({ passed: true, scanned: 0, violations: [] });
+    } finally {
+      await rm(directory, { recursive: true });
+    }
   });
 });
