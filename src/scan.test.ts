@@ -299,4 +299,18 @@ describe('default reason regexes', () => {
     const source = '// @todo [lodash@>4] drop it\n// eslint-disable-next-line\nx';
     expect(scanEslint(source).filter((v) => v.rule === 'missingReason')).toStrictEqual([]);
   });
+
+  it('does not report missingDate for a custom reason without @todo', () => {
+    const tools = { eslint: { directive: DEFAULT_TOOLS.eslint.directive, reason: /why:/ } };
+    expect(
+      scanSource(
+        '// why: legacy\n// eslint-disable-next-line\nx',
+        'a.ts',
+        ['eslint'],
+        tools,
+        { ...DEFAULT_RULES, missingDate: 'error' },
+        noPackageJson
+      )
+    ).toStrictEqual([]);
+  });
 });

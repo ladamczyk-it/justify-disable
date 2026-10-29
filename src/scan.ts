@@ -36,7 +36,7 @@ const findConditionProblems = (
       });
     }
   }
-  if (!conditions.some(({ kind }) => kind === 'date')) {
+  if (comment.includes('@todo') && !conditions.some(({ kind }) => kind === 'date')) {
     findings.push({
       rule: 'missingDate',
       message: `${directive} has a @todo without a date condition`,
