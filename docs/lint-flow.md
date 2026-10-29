@@ -1,4 +1,4 @@
-<!-- qoq-scribe sources: src/lint.ts src/resolve.ts src/provider.ts src/scan.ts src/defaults.ts src/types.ts -->
+<!-- qoq-scribe sources: src/lint.ts src/resolve.ts src/provider.ts src/scan.ts src/defaults.ts src/types.ts src/config.ts -->
 
 # Lint flow
 
@@ -31,3 +31,9 @@ A directive counts as justified only if the comment that ends on the line direct
 > Source: documented from plan
 
 Reading dominates cost (measured about six times the matching cost), so files are read through a small pool of `concurrency` workers (default 64) rather than serially or all at once.
+
+## Config loading and stats
+
+> Source: documented from plan
+
+`options.config` skips file discovery; otherwise `loadConfig()` supplies it (see [CLI, config file and stats](cli-and-stats.md)). `lint()` sends a run count only when the caller passes `stats: true`, and never prompts.

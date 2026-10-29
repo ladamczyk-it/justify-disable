@@ -195,4 +195,5 @@ Additional exports: `loadConfig`, `DEFAULT_CONFIG_FILES`, `DEFAULT_TOOLS`, `DEFA
 ## Contents
 
 - [justify-disable](docs/index.md)
+- [CLI, config file and stats](docs/cli-and-stats.md)
 - [Lint flow](docs/lint-flow.md)
