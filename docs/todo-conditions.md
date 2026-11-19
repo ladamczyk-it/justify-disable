@@ -1,3 +1,5 @@
+<!-- qoq-scribe sources: src/todo.ts src/package.ts src/scan.ts -->
+
 # Todo conditions
 
 justify-disable's `@todo` conditions are heavily inspired by unicorn's [`expiring-todo-comments`](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/expiring-todo-comments.md) rule. A bracket right after `@todo` says when the reason stops counting: a date, the project's own version, an engine or dependency range, or a dependency being added or removed. When a condition is met, the directive is reported as expired.

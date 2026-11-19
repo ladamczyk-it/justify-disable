@@ -216,9 +216,6 @@ const result = await lint({ config: { ignorePatterns: ['dist/**'] }, stats: fals
 
 Additional exports: `loadConfig`, `DEFAULT_CONFIG_FILES`, `DEFAULT_TOOLS`, `DEFAULT_EXTENSIONS`, `DEFAULT_CONCURRENCY`, `DEFAULT_RULES`, `gitProvider`, and the types `IToolDirectives`, `IProvidedFile`, `IProviderContext`, `TFileProvider`, `IJustifyDisableConfig`, `ILintOptions`, `IViolation`, `ILintResult`, `TRuleName`, `TRuleSeverity`.
 
-## Contents
+## Documentation
 
-- [justify-disable](docs/index.md)
-- [CLI, config file and stats](docs/cli-and-stats.md)
-- [Lint flow](docs/lint-flow.md)
-- [Todo conditions](docs/todo-conditions.md)
+[Detailed documentation](docs/index.md)
