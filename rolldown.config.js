@@ -5,8 +5,7 @@ import { defineConfig } from 'rolldown';
 const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
 
 const sourceDir = './src';
-// builtinModules has no `node:` prefixed names, and the sources import `node:*`.
-const external = [...builtinModules, /^node:/, ...Object.keys(pkg.dependencies)];
+const external = [...builtinModules, ...Object.keys(pkg.dependencies)];
 
 export default defineConfig([
   {
