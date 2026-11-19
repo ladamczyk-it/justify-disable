@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/ladamczyk-it/justify-disable/compare/v1.0.0...v1.0.1) (2026-11-19)
+
+
+### Bug Fixes
+
+* bump packages ([eb2d2d8](https://github.com/ladamczyk-it/justify-disable/commit/eb2d2d88ba651766170ed46bbbc439e8dd558bd1))
+
 # 1.0.0 (2026-10-29)
 
 
