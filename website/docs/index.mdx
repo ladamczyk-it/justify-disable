@@ -1,0 +1,317 @@
+---
+title: Introduction
+description: 'CLI that requires a written @todo reason above every eslint-disable and stylelint-disable directive, with optional conditions that expire it.'
+---
+
+import styles from '@internal/docusaurus-theme/github-button.module.css';
+
+<a
+  href="https://github.com/ladamczyk-it/justify-disable"
+  target="_blank"
+  rel="noopener noreferrer"
+  className={styles.githubButton}
+>
+  <span aria-hidden="true" className={styles.githubButtonIcon} />
+  <span>GitHub</span>
+</a>
+
+# Justify-disable
+
+> Content is verified against **`@ladamczyk/justify-disable` v1.0.1**. See [`CHANGELOG.md`](https://github.com/ladamczyk-it/justify-disable/blob/main/CHANGELOG.md) to verify accuracy.
+
+## Rationale
+
+Suppressions without a stated reason rot: nobody remembers why a rule was switched off, so nobody dares to switch it back on. `justify-disable` fails when an `eslint-disable` or `stylelint-disable` directive has no `@todo <reason>` comment directly above it.
+
+It is heavily inspired by unicorn's [`expiring-todo-comments`](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/expiring-todo-comments.md). A `@todo` can carry a bracketed condition (`@todo [2030-01-01] …`) that expires it: a date, the project's own version, an engine or dependency range, or a dependency being added or removed. See [todo conditions](#todo-conditions).
+
+## Install
+
+```bash
+npm install --save-dev @ladamczyk/justify-disable
+```
+
+or run it directly:
+
+```bash
+npx @ladamczyk/justify-disable
+```
+
+## The rule
+
+The comment ending on the line directly above a disable directive must contain `@todo <text>` (case-sensitive).
+
+```ts
+/**
+ * @todo Legacy API returns `any`; type it once the SDK is upgraded.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const response: any = await legacyCall();
+```
+
+- Multi-line `/** @todo … */` is the recommended style.
+- `//`, `/* */` and JSX `{/* */}` comments are accepted in JS-family files. CSS-family files accept block comments only.
+- A blank line between the comment and the directive breaks the link.
+- A same-line `-- reason` (`// eslint-disable-line no-console -- why`) does not count.
+- A bracketed condition may follow `@todo` (`@todo [2030-01-01] <text>`), see [todo conditions](#todo-conditions).
+
+### Defaults
+
+Directives checked:
+
+- `eslint-disable`
+- `eslint-disable-next-line`
+- `eslint-disable-line`
+- `stylelint-disable`
+- `stylelint-disable-next-line`
+- `stylelint-disable-line`
+
+Extensions and the tools applied to them:
+
+| Extension                                            | Tools                 |
+| ---------------------------------------------------- | --------------------- |
+| `js`, `mjs`, `cjs`, `jsx`, `ts`, `mts`, `cts`, `tsx` | `eslint`              |
+| `css`, `scss`, `sass`, `less`                        | `stylelint`           |
+| `vue`, `svelte`, `html`                              | `eslint`, `stylelint` |
+
+### Scope
+
+Files come from `git ls-files`: tracked and untracked, with `.gitignore` respected. Positional paths are passed to git as pathspecs. Running outside a git repository is an error (exit `2`), unless you configure a `provider`.
+
+### Known limits
+
+- Directives inside string literals are reported (the scan is textual, not a parse). Exclude such files with `ignorePatterns`.
+- HTML `<!-- eslint-disable -->` comments are not in the defaults. `html` files are scanned only for `//` and `/* */` directives.
+
+## Usage
+
+```bash
+justify-disable                  # scan the whole repo
+justify-disable src docs/a.ts    # scan only these pathspecs
+justify-disable --json           # machine-readable output
+justify-disable --concurrency 8  # read 8 files in parallel
+justify-disable -h               # list all options
+```
+
+| Option              | Default | Description                                |
+| ------------------- | ------- | ------------------------------------------ |
+| `--json`            | —       | Emit machine-readable JSON instead of text |
+| `--concurrency <n>` | `64`    | Files read in parallel (positive integer)  |
+
+| Exit code | Meaning                                                  |
+| --------- | -------------------------------------------------------- |
+| `0`       | No `error`-severity violations (warnings may be printed) |
+| `1`       | At least one `error`-severity violation                  |
+| `2`       | Any error (bad config, not a git repository, …)          |
+
+## Config
+
+Create `justify-disable.config.ts` (or `.js`, `.mjs`, `.cjs`) in the working directory (or any parent, up to the nearest directory containing a `package.json` or `package.yaml`) and default-export an object. Every key is optional.
+
+```ts
+import type { IJustifyDisableConfig } from '@ladamczyk/justify-disable';
+
+export default {
+  ignorePatterns: ['*.d.ts', 'dist/**'],
+  concurrency: 32,
+  stats: false,
+} satisfies IJustifyDisableConfig;
+```
+
+### `tools` and `extensions`
+
+Both merge over the defaults:
+
+- `tools` is merged by key over `DEFAULT_TOOLS`: a new key adds a tool, an existing key (`eslint`, `stylelint`) replaces that tool. Each tool is `{ directive, reason }`: `directive` is a regex whose capture group 1 is the directive name, `reason` is tested against the comment above (delimiters included).
+- `extensions` is merged by key over `DEFAULT_EXTENSIONS`: a key (extension without the dot, lowercase) replaces that entry; every other extension keeps its default. Tool names must exist in `tools`, otherwise `unknown tool "<name>"` is thrown.
+
+Because a key replaces the whole entry, extending one means spreading the default. Example: also check `@ts-ignore` in TypeScript files.
+
+```ts
+import { DEFAULT_EXTENSIONS } from '@ladamczyk/justify-disable';
+
+import type { IJustifyDisableConfig } from '@ladamczyk/justify-disable';
+
+export default {
+  tools: {
+    tsIgnore: {
+      directive: /(?:\/\/|\/\*)\s*(@ts-ignore)(?=\s|\*\/|$)/gm,
+      reason: /@todo[ \t]+[^\s*]/,
+    },
+  },
+  extensions: {
+    ts: [...DEFAULT_EXTENSIONS.ts, 'tsIgnore'],
+    mts: [...DEFAULT_EXTENSIONS.mts, 'tsIgnore'],
+    cts: [...DEFAULT_EXTENSIONS.cts, 'tsIgnore'],
+    tsx: [...DEFAULT_EXTENSIONS.tsx, 'tsIgnore'],
+  },
+} satisfies IJustifyDisableConfig;
+```
+
+### `ignorePatterns`
+
+Matched against the posix path (relative to the working directory) with `path.matchesGlob`. This is not gitignore:
+
+- A pattern with no `/` gets `**/` prepended, so it is matched against the path at any depth: `*.d.ts` matches both `x.d.ts` and `src/x.d.ts`.
+- It still has to match the whole path. `dist` matches only a path whose last segment is `dist`, never the files under `dist/`. To ignore a directory, write `dist/**`.
+
+### `concurrency`
+
+Number of files read in parallel, a positive integer, default `64` (`DEFAULT_CONCURRENCY`). The `--concurrency` flag and the `concurrency` option of `lint()` override it.
+
+### `rules`
+
+Four rules, each with a severity. Merged by key over `DEFAULT_RULES`:
+
+| Rule               | Default | Reports                                       |
+| ------------------ | ------- | --------------------------------------------- |
+| `missingReason`    | `error` | a directive with no `@todo <reason>` above it |
+| `expired`          | `error` | a `@todo` condition that is met               |
+| `invalidCondition` | `error` | a `@todo` condition that cannot be checked    |
+| `missingDate`      | `off`   | a `@todo` with no date condition              |
+
+`error` fails the run (exit `1`). `warn` is printed with a `⚠` and exits `0`. `off` reports nothing. `passed` is false only when some violation has `error` severity. An unknown rule name, or a severity other than `error`, `warn` or `off`, throws.
+
+```ts
+import type { IJustifyDisableConfig } from '@ladamczyk/justify-disable';
+
+export default {
+  rules: { missingDate: 'warn', expired: 'warn' },
+} satisfies IJustifyDisableConfig;
+```
+
+The conditions these rules report are described in [todo conditions](#todo-conditions).
+
+### `provider`
+
+The extension point for where files come from. It replaces the default git provider (`gitProvider`); the qoq provider lives in qoq, not here.
+
+```ts
+type TFileProvider = (context: IProviderContext) => IProvidedFile[] | Promise<IProvidedFile[]>;
+
+interface IProviderContext {
+  paths: string[]; // the positional CLI paths (or `lint({ paths })`), [] when none
+}
+
+interface IProvidedFile {
+  path: string; // posix, relative to the working directory
+  tools?: string[]; // when present, these tools apply and the extension map is skipped
+}
+```
+
+`context.paths` is passed through exactly as given, unexpanded; interpreting it is the provider's job. An absolute path is an error.
+
+## Todo conditions
+
+### Syntax
+
+```ts
+/**
+ * @todo [2030-01-01, react@^19] Legacy API returns `any`; type it once the SDK is upgraded.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const response: any = await legacyCall();
+```
+
+- The bracket follows the first `@todo` in the comment, with spaces or tabs allowed between them. It must fit on one line: a `[` with no `]` before the end of that line reports one `invalidCondition` ("condition list must fit on one line").
+- Tokens are separated by commas and trimmed.
+- Prose must still follow the bracket. `@todo [2030-01-01]` on its own has no reason and is reported as `missingReason` ("has a @todo without a reason").
+
+### Condition kinds
+
+| Token              | Kind       | Met (expired) when                                                   |
+| ------------------ | ---------- | -------------------------------------------------------------------- |
+| `2030-01-01`       | date       | today (UTC) is after that date                                       |
+| `<2.0.0`           | version    | the package's own `version` satisfies the range                      |
+| `engine:node@>=20` | engine     | the lowest version `engines.node` allows satisfies the range         |
+| `+left-pad`        | added      | `left-pad` is in `dependencies` or `devDependencies`                 |
+| `-left-pad`        | removed    | `left-pad` is in neither                                             |
+| `react@^19`        | dependency | the lowest version the declared `react` range allows satisfies `^19` |
+
+- A version token is any semver range. An engine can be any name in `engines`, e.g. `engine:npm@>=10`.
+- A dependency is looked up in `dependencies`, then `devDependencies`.
+- "Lowest version" is the lowest version a declared range allows: `^18.2.0` counts as `18.2.0`, and `^22.22.2 || ^24.15.0` as `22.22.2`.
+- Ranges are checked with prereleases included.
+- A date on the day itself is still unmet. A bracket holds at most one date and at most one own-version range; repeats are invalid.
+
+### Invalid conditions
+
+A condition that cannot be checked is reported as `invalidCondition`, with the reason after the colon:
+
+```text
+src/app.ts:12:1  eslint-disable-next-line has an invalid @todo condition [react@^19]: react is not declared in package.json
+```
+
+| Case                                                                                                       | Detail                                                    |
+| ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| an empty token, such as `[2030-01-01,]`                                                                    | `empty condition`                                         |
+| a date that is not a real calendar day, such as `2030-02-30`                                               | `not a real calendar date`                                |
+| a second date in one bracket                                                                               | `only one date condition is allowed`                      |
+| a second own-version range in one bracket                                                                  | `only one version condition is allowed`                   |
+| a range that matches every version, such as `*`, `x` or `>=0.0.0`                                          | `"<range>" matches every version`                         |
+| a token that is not a semver range                                                                         | `"<token>" is not a valid semver range`                   |
+| a dependency that is not declared                                                                          | `<name> is not declared in package.json`                  |
+| a declared dependency range semver cannot read, such as `workspace:*`, `file:`, git URLs or `npm:` aliases | `<name> range "<declared>" is not a semver range`         |
+| an engine that is not declared                                                                             | `no engines.<name> in package.json`                       |
+| a declared engine range semver cannot read                                                                 | `engines.<name> range "<declared>" is not a semver range` |
+| an own version that is missing or not valid semver                                                         | `no version in package.json`                              |
+| a condition that needs package.json when none is found                                                     | `no package.json found (needed for the <kind> condition)` |
+
+`<kind>` is one of `version`, `engine`, `added`, `removed` or `dependency`. Date conditions never need package.json.
+
+### Missing date
+
+`missingDate` is off by default. It reports a `@todo` with no date condition. A date that fails the calendar check does not count, so `2030-02-30` raises `invalidCondition` and, with `missingDate` on, `missingDate` as well.
+
+### The package.json lookup
+
+The version, engine, added, removed and dependency kinds read a package.json:
+
+- The nearest `package.json` is used. The lookup walks up from the directory of the file holding the directive, to the filesystem root, and reads the first one it finds.
+- The walk can leave the project. A file in a directory with no `package.json` reads the nearest ancestor's, which may sit outside the project.
+- Each directory is read at most once per run, and only when a condition needs it.
+- Unparsable JSON, or a top level that is not an object, fails the run with `invalid package.json: <absolute path>` and exit `2`. It fails only when a condition reaches that file. Exit codes are described in [Usage](#usage).
+
+A project at version `0.0.0`, the placeholder semantic-release projects keep, compares its own-version conditions against `0.0.0`. `>=1.0.0` is never met there. A range that includes `0.0.0`, such as `<1.0.0`, is met from the start.
+
+## JavaScript API
+
+```ts
+import { lint, format } from '@ladamczyk/justify-disable';
+
+const result = await lint({ paths: ['src'], stats: false });
+
+result.passed; // boolean, false only when a violation has error severity
+result.scanned; // number of files read
+result.violations; // Array<{ path, line, column, directive, tool, rule, severity, message }>
+
+process.stdout.write(format(result)); // or format(result, true) for JSON
+```
+
+Pass `config` to skip config-file discovery:
+
+```ts
+const result = await lint({ config: { ignorePatterns: ['dist/**'] }, stats: false });
+```
+
+Additional exports: `loadConfig`, `DEFAULT_CONFIG_FILES`, `DEFAULT_TOOLS`, `DEFAULT_EXTENSIONS`, `DEFAULT_CONCURRENCY`, `DEFAULT_RULES`, `gitProvider`, and the types `IToolDirectives`, `IProvidedFile`, `IProviderContext`, `TFileProvider`, `IJustifyDisableConfig`, `ILintOptions`, `IViolation`, `ILintResult`, `TRuleName`, `TRuleSeverity`.
+
+## Usage statistics
+
+Justify-disable counts its own runs, and only with your say-so. The first interactive run asks; the answer is stored as `stats: true | false` in your [`justify-disable.config.*`](#config) (spliced into your own source, so comments and formatting survive) and never asked again — edit or delete the key to change it. The [JavaScript API](#javascript-api) never prompts: `stats` is a required boolean on `lint()`, so the calling host states its own user's consent.
+
+![Justify-disable monthly usage — runs per month](https://adamczyk.ovh/img/stats/justify-disable.png)
+
+A counted run posts one constant to `https://stats.adamczyk.ovh`, the same body every time, whether it came from the CLI or the API:
+
+```jsonc
+{ "tool": "justify-disable", "options": [] } // `options` is always empty
+```
+
+Where an outbound POST never leaves the network, the same run counts as a plain image GET instead — `https://adamczyk.ovh/img/stats/pixel.png?tool=justify-disable` — which carries the same single value and nothing more.
+
+Never sent: your code, file names, paths, config contents, violations, the flags you typed, project or package names, and nothing identifying you or your machine. The send is capped at 2s, so a slow or dead endpoint can't hold a run up. Runs that can't ask — `CI=true`, a pipe, `--json`, or a project with no config file to record the answer in — are never prompted and never counted.
+
+## Changelog
+
+Release history lives in the repo — [`CHANGELOG.md`](https://github.com/ladamczyk-it/justify-disable/blob/main/CHANGELOG.md).
