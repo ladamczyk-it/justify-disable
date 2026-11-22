@@ -5,6 +5,8 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import styles from '@internal/docusaurus-theme/hero.module.css';
 import Layout from '@theme/Layout';
 
+import { DisableAnimation } from '../components/DisableAnimation';
+
 // Placeholder homepage: replace it in every Tool.
 const Home = (): ReactNode => {
   const { siteConfig } = useDocusaurusContext();
@@ -23,6 +25,7 @@ const Home = (): ReactNode => {
             </div>
           </div>
         </header>
+        <DisableAnimation />
       </main>
     </Layout>
   );
