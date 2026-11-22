@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- A code-comment block (// and two text lines) with a check mark: the disable is justified. -->
+  <g fill="none" stroke="#12b8cc" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 14l6 10M20 14l6 10" opacity=".65" />
+    <path d="M34 19h20M10 36h24M10 48h14" opacity=".65" />
+    <path d="M34 48l7 7 16-16" stroke="#2fd08a" stroke-width="6.5" />
+  </g>
+</svg>
