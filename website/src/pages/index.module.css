@@ -8,22 +8,25 @@
 }
 
 .heroTop {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1.75rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 1rem;
   width: 100%;
 }
 
+/* Title spans the row; tagline and button share the next one. */
 .heroText {
-  display: flex;
-  flex-direction: column;
-  gap: 1.75rem;
-  max-width: 44rem;
+  display: contents;
+}
+
+.heroText > h1 {
+  grid-column: 1 / -1;
+  margin: 0;
 }
 
 .heroText > p {
+  max-width: 56rem;
   text-align: justify;
 }
 
@@ -41,8 +44,8 @@
   }
 
   .heroTop {
-    flex-direction: column;
-    align-items: center;
+    grid-template-columns: 1fr;
+    justify-items: center;
   }
 }
 

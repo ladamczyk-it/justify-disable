@@ -12,10 +12,10 @@
   --bad: oklch(0.7 0.19 20);
   --muted: oklch(0.6 0.015 var(--cv-hue));
 
-  max-width: 760px;
+  /* The hero text and feature boxes share this column: 1100px, 1.5rem gutters on phones. */
+  width: min(1100px, 100% - 3rem);
   margin: 0 auto;
-  padding: 0 6vw 3rem;
-  box-sizing: content-box;
+  padding: 0 0 3rem;
 }
 
 .panel {
