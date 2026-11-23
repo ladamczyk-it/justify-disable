@@ -10,43 +10,6 @@
   --h: 1.9em;
   --ok: oklch(0.75 0.16 150);
   --bad: oklch(0.7 0.19 20);
-  --muted: oklch(0.6 0.015 var(--cv-hue));
-
-  /* The hero text and feature boxes share this column: 1100px, 1.5rem gutters on phones. */
-  width: min(1100px, 100% - 3rem);
-  margin: 0 auto;
-  padding: 0 0 3rem;
-}
-
-.panel {
-  overflow: hidden;
-  border: 1.5px solid var(--cv-color-hex-frame);
-  border-radius: 0.75rem;
-  background: var(--cv-color-charcoal);
-  color: var(--cv-color-near-white);
-  font-family: var(--ifm-font-family-monospace);
-  font-size: clamp(0.62rem, 2.2vw, 0.85rem);
-  box-shadow: 0 20px 50px -20px oklch(0.46 0.19 var(--cv-hue) / 0.45);
-}
-
-.titleBar {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.6rem 0.9rem;
-  border-bottom: 1px solid oklch(1 0 0 / 8%);
-}
-
-.dot {
-  width: 0.65rem;
-  height: 0.65rem;
-  border-radius: 50%;
-  background: oklch(1 0 0 / 18%);
-}
-
-.titleText {
-  margin-left: 0.5rem;
-  color: var(--muted);
 }
 
 /* ── Code ──────────────────────────────────────────────────────────────── */
@@ -141,16 +104,6 @@
 }
 
 /* ── Terminal ──────────────────────────────────────────────────────────── */
-
-.terminal {
-  padding: 0.75rem 0.9rem 1rem;
-  border-top: 1px solid oklch(1 0 0 / 8%);
-  background: var(--cv-color-charcoal-deep);
-}
-
-.prompt {
-  color: var(--muted);
-}
 
 .output {
   display: grid;
@@ -325,17 +278,5 @@
   97%,
   100% {
     opacity: 0;
-  }
-}
-
-@media screen and (max-width: 996px) {
-  .wrapper {
-    padding: 0 1.5rem 2rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .wrapper * {
-    animation: none !important;
   }
 }

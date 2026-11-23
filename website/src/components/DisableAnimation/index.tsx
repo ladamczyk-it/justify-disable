@@ -1,5 +1,8 @@
 import type { CSSProperties, ReactNode } from 'react';
 
+import frame from '@internal/docusaurus-theme/terminal-window.module.css';
+import { TerminalWindow } from '@internal/docusaurus-theme/TerminalWindow';
+
 import styles from './styles.module.css';
 
 /**
@@ -29,47 +32,35 @@ const LABEL =
   'Animation: justify-disable scans src/app.ts, flags the eslint-disable directive with no @todo reason above it, then passes once a @todo comment explains it.';
 
 export const DisableAnimation = (): ReactNode => (
-  <section className={styles.wrapper}>
-    <div className={styles.panel} role="img" aria-label={LABEL}>
-      <div aria-hidden="true">
-        <div className={styles.titleBar}>
-          <span className={styles.dot} />
-          <span className={styles.dot} />
-          <span className={styles.dot} />
-          <span className={styles.titleText}>src/app.ts</span>
+  <TerminalWindow className={styles.wrapper} label={LABEL} title="src/app.ts">
+    <div className={styles.code}>
+      <span className={styles.scan} />
+      {ROWS.map(({ line, checked, variant }, i) => (
+        <div
+          key={line || 'blank'}
+          className={variant ? `${styles.row} ${styles[variant]}` : styles.row}
+          style={{ '--i': i } as CSSProperties}
+        >
+          <span className={styles.line}>{line}</span>
+          {checked && <span className={styles.markOk}>✔</span>}
+          {variant === 'flagged' && (
+            <span className={styles.flagMark}>
+              <span className={styles.flagBad}>✖</span>
+              <span className={styles.flagOk}>✔</span>
+            </span>
+          )}
         </div>
-        <div className={styles.code}>
-          <span className={styles.scan} />
-          {ROWS.map(({ line, checked, variant }, i) => (
-            <div
-              key={line || 'blank'}
-              className={variant ? `${styles.row} ${styles[variant]}` : styles.row}
-              style={{ '--i': i } as CSSProperties}
-            >
-              <span className={styles.line}>{line}</span>
-              {checked && <span className={styles.markOk}>✔</span>}
-              {variant === 'flagged' && (
-                <span className={styles.flagMark}>
-                  <span className={styles.flagBad}>✖</span>
-                  <span className={styles.flagOk}>✔</span>
-                </span>
-              )}
-            </div>
-          ))}
+      ))}
+    </div>
+    <div className={frame.terminal}>
+      <div className={frame.prompt}>$ npx justify-disable</div>
+      <div className={styles.output}>
+        <div className={styles.fail}>
+          <div>{FAILURE}</div>
+          <div>1 unjustified disable directive(s) found.</div>
         </div>
-        <div className={styles.terminal}>
-          <div className={styles.prompt}>$ npx justify-disable</div>
-          <div className={styles.output}>
-            <div className={styles.fail}>
-              <div>{FAILURE}</div>
-              <div>1 unjustified disable directive(s) found.</div>
-            </div>
-            <div className={styles.pass}>
-              ✔ No unjustified disable directives (24 files scanned).
-            </div>
-          </div>
-        </div>
+        <div className={styles.pass}>✔ No unjustified disable directives (24 files scanned).</div>
       </div>
     </div>
-  </section>
+  </TerminalWindow>
 );
