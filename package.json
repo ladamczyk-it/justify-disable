@@ -1,9 +1,20 @@
 {
   "name": "@ladamczyk/justify-disable",
   "version": "1.0.1",
-  "description": "CLI that requires a justification for every lint disable comment, heavily inspired by unicorn's expiring-todo-comments",
+  "description": "Fail the build on unexplained lint suppressions: every eslint-disable and stylelint-disable needs a written @todo reason that can expire. A guardrail for AI-written and human code.",
   "keywords": [
-    "cli"
+    "cli",
+    "eslint",
+    "eslint-disable",
+    "stylelint",
+    "stylelint-disable",
+    "lint",
+    "todo",
+    "expiring-todo-comments",
+    "code-quality",
+    "ai-agents",
+    "quality-gate",
+    "qoq"
   ],
   "repository": {
     "type": "git",

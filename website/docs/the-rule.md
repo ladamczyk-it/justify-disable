@@ -1,7 +1,10 @@
 ---
-title: The rule
+title: 'When a lint disable counts as justified'
+sidebar_label: 'The rule'
 sidebar_position: 2
-description: 'What counts as a reason above a disable directive, the defaults, the scope of a run and the known limits.'
+description: 'What counts as a @todo reason above an eslint-disable or stylelint-disable directive: the defaults, what a run scans and the known limits.'
+keywords:
+  [eslint-disable reason, stylelint-disable, lint suppression, todo comment, justify eslint-disable]
 ---
 
 The comment ending on the line directly above a disable directive must contain `@todo <text>` (case-sensitive).

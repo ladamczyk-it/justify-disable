@@ -1,8 +1,19 @@
 ---
-title: Todo conditions
+title: 'Expiring @todo conditions for lint disables'
+sidebar_label: 'Todo conditions'
 sidebar_position: 5
-description: 'Bracketed @todo conditions that expire a reason on a date, a version, an engine or a dependency.'
+description: 'Make a lint disable expire: @todo conditions on a date, your package version, an engine, or a dependency being added, removed or bumped.'
+keywords:
+  [
+    expiring todo comments,
+    todo date,
+    eslint-disable expire,
+    dependency version condition,
+    unicorn expiring-todo-comments,
+  ]
 ---
+
+A `@todo` reason can carry a bracketed condition that expires it, so a lint disable doesn't outlive the reason it was added for. When a condition is met, the directive is reported as `expired` and the run fails until someone looks at it again. The conditions are heavily inspired by unicorn's [`expiring-todo-comments`](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/expiring-todo-comments.md) rule.
 
 ## Syntax
 

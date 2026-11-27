@@ -1,0 +1,50 @@
+# Justify-disable
+
+> Justify-disable (@ladamczyk/justify-disable) is a CLI and JavaScript API that fails the build when an eslint-disable or stylelint-disable directive has no written @todo reason directly above it. A reason can expire on a date, a version or a dependency change. It is a guardrail against AI coding agents and people silencing lint rules without saying why, and an optional check inside qoq.
+
+Install and run: `npm install --save-dev @ladamczyk/justify-disable` then `npx justify-disable`, or `npx @ladamczyk/justify-disable`. Needs Node ^22.22.2, ^24.15.0 or >=26, npm 10+, and a git repository (files come from `git ls-files`, respecting .gitignore) unless a custom provider is configured. It does not need ESLint or Stylelint installed.
+
+The rule: the comment ending on the line directly above a disable directive must contain `@todo <reason>` (case-sensitive). A same-line `-- reason` does not count, and a blank line breaks the link. Stylelint reasons must be a `/* */` block comment. `@todo [conditions]` with no prose after it is reported as missingReason.
+
+Example:
+```ts
+// @todo [2030-01-01] Legacy SDK returns any; type it after the v3 upgrade.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const response: any = await legacyCall();
+```
+
+Directives checked by default: eslint-disable, eslint-disable-next-line, eslint-disable-line, stylelint-disable, stylelint-disable-next-line, stylelint-disable-line. Others (for example @ts-ignore) need a custom `tools` entry. Extensions: js, mjs, cjs, jsx, ts, mts, cts, tsx for ESLint; css, scss, sass, less for Stylelint; vue, svelte, html for both.
+
+Todo conditions, in brackets after @todo, comma-separated, on one line: a date `2030-01-01` (expires after that day, UTC), the package's own version `<2.0.0`, `engine:node@>=20`, `+dep` (dependency added), `-dep` (dependency removed), `dep@^5` (lowest declared version satisfies the range). A met condition is reported as expired.
+
+CLI: `justify-disable [...pathspecs]`, `--json`, `--concurrency <n>` (default 64), `-h`. Exit codes: 0 no error-severity violation (warnings may print); 1 at least one error-severity violation; 2 any other error (bad config, not a git repository, unmatched pathspec).
+
+JSON (`--json`): `{ passed, scanned, violations: [{ path, line, column, directive, tool, rule, severity, message }] }`, line and column 1-based; on failure `{ passed: false, error }`. No schema version field. Runs with --json, CI=true or no terminal never prompt.
+
+Config: `justify-disable.config.ts` (or .js, .mjs, .cjs), found up to the nearest package.json, default-exporting an object with optional `tools`, `extensions`, `ignorePatterns`, `concurrency`, `rules`, `provider`, `stats`. Rules and default severities: missingReason error, expired error, invalidCondition error, missingDate off; each can be error, warn or off.
+
+JavaScript API (ESM, TypeScript types included): `lint({ paths?, config?, concurrency?, stats })` resolves to `{ passed, scanned, violations }`; `stats` is a required boolean and the API never prompts. `format(result, json?)` renders text or JSON. Also `loadConfig`, `gitProvider`, `DEFAULT_CONFIG_FILES`, `DEFAULT_TOOLS`, `DEFAULT_EXTENSIONS`, `DEFAULT_CONCURRENCY`, `DEFAULT_RULES` and their types.
+
+qoq: enable with `justifyDisable: { severity: 'warn' | 'error' }` in qoq.config.js (default off). error fails `qoq --check`, warn reports only. qoq passes its own config, so justify-disable.config is not read there; missingDate stays off; the scan follows qoq's ESLint and Stylelint file scope; `--skip-justify-disable` skips it; `--json` writes justify-disable-report.json, which the /qoq fix skill reads.
+
+Compared with eslint-comments/require-description (reason after `--` in the same comment, ESLint only, no expiry) and unicorn/expiring-todo-comments (expiring conditions for TODO comments, not for disable directives): justify-disable checks ESLint and Stylelint directives outside the linters and lets the reason expire.
+
+Usage statistics: opt-in; the answer is stored as `stats` in the project config. With `stats: true` stored, every CLI run counts, CI included; only the tool name is sent.
+
+## Docs
+
+- [justify-disable: require a reason for every lint disable](https://justify-disable.adamczyk.ovh/docs/): what it does, install, comparison with ESLint rules
+- [How justify-disable decides a lint disable is justified](https://justify-disable.adamczyk.ovh/docs/the-rule): what counts as a reason, defaults, scope and limits
+- [justify-disable CLI options and exit codes](https://justify-disable.adamczyk.ovh/docs/cli): pathspecs, --json, --concurrency and exit codes
+- [justify-disable configuration file reference](https://justify-disable.adamczyk.ovh/docs/configuration): tools, extensions, ignorePatterns, concurrency, rules and provider
+- [Expiring @todo conditions for lint disables](https://justify-disable.adamczyk.ovh/docs/todo-conditions): date, version, engine and dependency conditions
+- [justify-disable JavaScript API](https://justify-disable.adamczyk.ovh/docs/javascript-api): lint(), format() and the other exports
+- [justify-disable for AI coding agents and CI](https://justify-disable.adamczyk.ovh/docs/ai-agents-and-ci): JSON shape, exit codes and an AGENTS.md snippet
+- [justify-disable in qoq](https://justify-disable.adamczyk.ovh/docs/qoq): enabling it in qoq --check and how /qoq fix reports it
+
+## Optional
+
+- [justify-disable usage statistics](https://justify-disable.adamczyk.ovh/docs/usage-statistics): the opt-in prompt and exactly what is sent
+- [GitHub repository](https://github.com/ladamczyk-it/justify-disable): source, issues and CHANGELOG.md
+- [npm package](https://www.npmjs.com/package/@ladamczyk/justify-disable): @ladamczyk/justify-disable
+- [qoq](https://qoq.adamczyk.ovh/): the JavaScript/TypeScript quality suite that can run justify-disable

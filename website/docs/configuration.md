@@ -1,7 +1,10 @@
 ---
-title: Configuration
+title: 'Configuration file reference'
+sidebar_label: 'Configuration'
 sidebar_position: 4
-description: 'The justify-disable.config file and its keys: tools, extensions, ignorePatterns, concurrency, rules and provider.'
+description: 'Everything justify-disable.config.ts can set: custom tools and directives such as @ts-ignore, extensions, ignorePatterns and rules.'
+keywords:
+  [justify-disable config, ts-ignore, custom directives, lint rules severity, ignorePatterns]
 ---
 
 Create `justify-disable.config.ts` (or `.js`, `.mjs`, `.cjs`) in the working directory (or any parent, up to the nearest directory containing a `package.json` or `package.yaml`) and default-export an object. Every key is optional.
