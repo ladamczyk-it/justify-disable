@@ -1,7 +1,8 @@
 ---
-title: 'justify-disable configuration file reference'
+title: 'Configuration file reference'
+sidebar_label: 'Configuration'
 sidebar_position: 4
-description: 'How to configure justify-disable with justify-disable.config.ts: custom tools and directives such as @ts-ignore, extensions, ignorePatterns and rules.'
+description: 'Everything justify-disable.config.ts can set: custom tools and directives such as @ts-ignore, extensions, ignorePatterns and rules.'
 keywords:
   [justify-disable config, ts-ignore, custom directives, lint rules severity, ignorePatterns]
 ---

@@ -1,7 +1,8 @@
 ---
-title: 'justify-disable usage statistics and privacy'
+title: 'Usage statistics and privacy'
+sidebar_label: 'Usage statistics'
 sidebar_position: 9
-description: 'What justify-disable counts, and only with your consent: where the answer is stored, the one value it sends, what is never sent, and how CI runs behave.'
+description: 'What gets counted, and only with your consent: where the answer is stored, the one value it sends, what is never sent, and how CI runs behave.'
 keywords: [justify-disable privacy, opt-in telemetry, usage statistics, cli telemetry]
 ---
 

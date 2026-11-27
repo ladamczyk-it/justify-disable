@@ -1,11 +1,12 @@
 ---
-title: 'justify-disable in qoq, the AI quality gate for JS'
+title: 'qoq integration'
+sidebar_label: 'qoq integration'
 sidebar_position: 8
-description: 'Turn on justify-disable inside qoq --check: justifyDisable severity, which files it scans, how it differs from a standalone run, and how /qoq fix reports it.'
+description: 'Turn the check on inside qoq --check: the justifyDisable severity, which files it scans, how it differs from a standalone run, and how /qoq fix reports it.'
 keywords: [qoq, qoq-cli, ai quality gate, justify-disable, eslint-disable check, claude code skill]
 ---
 
-[qoq](https://qoq.adamczyk.ovh/) is a quality suite for JavaScript and TypeScript projects (ESLint, Prettier, Knip, JSCPD and more behind one CLI) and a Claude Code skill that turns those checks into a guarded delivery loop. Justify-disable is one of its optional checks: `@ladamczyk/qoq-cli` calls its [JavaScript API](./javascript-api.md) in-process, so with `severity: 'error'` an unexplained lint disable fails `qoq --check`.
+[qoq](https://qoq.adamczyk.ovh/) is a quality suite for JavaScript and TypeScript projects (ESLint, Prettier, Knip, JSCPD and more behind one CLI) and a Claude Code skill that turns those checks into a guarded delivery loop. This is one of qoq's optional checks: `@ladamczyk/qoq-cli` calls its [JavaScript API](./javascript-api.md) in-process, so with `severity: 'error'` an unexplained lint disable fails `qoq --check`.
 
 ## Turn it on
 
@@ -27,7 +28,7 @@ export default {
 ## How it differs from a standalone run
 
 - **qoq's config wins.** qoq passes its own config to `lint()`, so a `justify-disable.config.*` in the project is not read. `severity` applies to `missingReason`, `expired` and `invalidCondition`; `missingDate` stays off.
-- **qoq's scope.** It scans the files your qoq ESLint entries (`files` / `ignores`) or Stylelint glob cover, limited to the extensions justify-disable assigns to each tool, and only staged files when qoq checks staged files.
+- **qoq's scope.** It scans the files your qoq ESLint entries (`files` / `ignores`) or Stylelint glob cover, limited to the extensions assigned to each tool, and only staged files when qoq checks staged files.
 
 ## Reports and /qoq fix
 

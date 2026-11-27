@@ -1,7 +1,8 @@
 ---
-title: 'justify-disable CLI options and exit codes'
+title: 'CLI options and exit codes'
+sidebar_label: 'Command line'
 sidebar_position: 3
-description: 'Every justify-disable command-line option, from --json to --concurrency, the pathspecs it accepts and what exit codes 0, 1 and 2 mean in CI.'
+description: 'Every command-line option, from --json to --concurrency, the pathspecs it accepts and what exit codes 0, 1 and 2 mean in CI.'
 keywords: [justify-disable cli, eslint-disable check, exit codes, json output, ci]
 ---
 

@@ -1,7 +1,8 @@
 ---
-title: 'justify-disable: require a reason for every lint disable'
+title: 'Require a reason for every lint disable'
+sidebar_label: 'Introduction'
 sidebar_position: 1
-description: 'justify-disable fails the build when an eslint-disable or stylelint-disable has no @todo reason above it, and can expire that reason. A CLI and a JS API.'
+description: 'Fail the build when an eslint-disable or stylelint-disable has no @todo reason above it, and let that reason expire. A CLI and a JavaScript API.'
 keywords:
   [
     eslint-disable,
@@ -34,7 +35,7 @@ Justify-disable is a CLI and JavaScript API that fails the build when an `eslint
 
 ## Why
 
-Suppressions without a stated reason rot: nobody remembers why a rule was switched off, so nobody dares to switch it back on. AI coding agents make this worse, because adding a disable comment is the quickest way to make a lint error go away. Justify-disable turns every suppression into a decision someone wrote down, and lets that decision expire.
+Suppressions without a stated reason rot: nobody remembers why a rule was switched off, so nobody dares to switch it back on. AI coding agents make this worse, because adding a disable comment is the quickest way to make a lint error go away. It turns every suppression into a decision someone wrote down, and lets that decision expire.
 
 ```ts
 // @todo [2030-01-01] Legacy SDK returns any; type it after the v3 upgrade.
@@ -69,7 +70,7 @@ It needs Node `^22.22.2`, `^24.15.0` or `>=26`, npm 10 or later, and a git repos
 | Custom directives (`@ts-ignore`, …) | yes, through `tools` config                                    | yes, through `additionalDirectives`   | no                               |
 | Needs ESLint                        | no                                                             | yes                                   | yes                              |
 
-The ESLint rules are good choices when ESLint already runs everywhere. Justify-disable is for one check across ESLint and Stylelint directives, outside the linters, with reasons that expire.
+The ESLint rules are good choices when ESLint already runs everywhere. Reach for this one when you want a single check across ESLint and Stylelint directives, outside the linters, with reasons that expire.
 
 ## Use it as a gate
 

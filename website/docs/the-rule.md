@@ -1,7 +1,8 @@
 ---
-title: 'How justify-disable decides a lint disable is justified'
+title: 'When a lint disable counts as justified'
+sidebar_label: 'The rule'
 sidebar_position: 2
-description: 'What counts as a @todo reason above an eslint-disable or stylelint-disable directive in justify-disable: defaults, scan scope and known limits.'
+description: 'What counts as a @todo reason above an eslint-disable or stylelint-disable directive: the defaults, what a run scans and the known limits.'
 keywords:
   [eslint-disable reason, stylelint-disable, lint suppression, todo comment, justify eslint-disable]
 ---

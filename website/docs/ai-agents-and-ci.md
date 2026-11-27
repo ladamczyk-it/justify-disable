@@ -1,7 +1,8 @@
 ---
-title: 'justify-disable for AI coding agents and CI'
+title: 'Lint suppression guardrail for AI agents and CI'
+sidebar_label: 'AI agents and CI'
 sidebar_position: 7
-description: 'Stop AI coding agents and CI merges from silencing lint errors without a reason: justify-disable JSON output, exit codes, warnings and an AGENTS.md snippet.'
+description: 'Stop AI coding agents and CI merges from silencing lint errors without a reason: JSON output, exit codes, warnings and an AGENTS.md snippet.'
 keywords:
   [
     ai coding agent eslint-disable,
@@ -13,7 +14,7 @@ keywords:
   ]
 ---
 
-Justify-disable is a guardrail for AI coding agents such as Claude Code, Codex or Cursor, and a gate for CI. An agent that silences a lint error with `eslint-disable` must also write down why, in a `@todo` comment a reviewer can read, and the run fails until it does.
+A guardrail for AI coding agents such as Claude Code, Codex or Cursor, and a gate for CI. An agent that silences a lint error with `eslint-disable` must also write down why, in a `@todo` comment a reviewer can read, and the run fails until it does.
 
 ## The contract
 
@@ -74,4 +75,4 @@ Paste this into your `AGENTS.md` or `CLAUDE.md`:
 
 ## Inside qoq
 
-[qoq](https://qoq.adamczyk.ovh/) can run justify-disable as part of `qoq --check`, as a warning or as a failing check. See [qoq integration](./qoq.md).
+[qoq](https://qoq.adamczyk.ovh/) can run this check as part of `qoq --check`, as a warning or as a failing check. See [qoq integration](./qoq.md).

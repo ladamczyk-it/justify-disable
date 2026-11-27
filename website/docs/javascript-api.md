@@ -1,7 +1,8 @@
 ---
-title: 'justify-disable JavaScript API: lint() and format()'
+title: 'JavaScript API: lint() and format()'
+sidebar_label: 'JavaScript API'
 sidebar_position: 6
-description: 'Run justify-disable from Node: lint() options and result, format() for text or JSON, custom file providers, and the default tools, rules and extensions.'
+description: 'Run the check from Node: lint() options and result, format() for text or JSON, custom file providers, and the default tools, rules and extensions.'
 keywords: [justify-disable api, lint api, eslint-disable checker node, file provider, typescript]
 ---
 

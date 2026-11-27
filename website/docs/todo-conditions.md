@@ -1,7 +1,8 @@
 ---
 title: 'Expiring @todo conditions for lint disables'
+sidebar_label: 'Todo conditions'
 sidebar_position: 5
-description: 'Make a lint disable expire with justify-disable: @todo conditions on a date, your package version, an engine, or a dependency being added, removed or bumped.'
+description: 'Make a lint disable expire: @todo conditions on a date, your package version, an engine, or a dependency being added, removed or bumped.'
 keywords:
   [
     expiring todo comments,
