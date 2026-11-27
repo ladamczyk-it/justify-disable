@@ -1,0 +1,43 @@
+---
+title: Introduction
+sidebar_position: 1
+description: 'CLI that requires a written @todo reason above every eslint-disable and stylelint-disable directive, with optional conditions that expire it.'
+---
+
+import styles from '@internal/docusaurus-theme/github-button.module.css';
+
+<a
+  href="https://github.com/ladamczyk-it/justify-disable"
+  target="_blank"
+  rel="noopener noreferrer"
+  className={styles.githubButton}
+>
+  <span aria-hidden="true" className={styles.githubButtonIcon} />
+  <span>GitHub</span>
+</a>
+
+# Justify-disable
+
+> Content is verified against **`@ladamczyk/justify-disable` v1.0.1**. See [`CHANGELOG.md`](https://github.com/ladamczyk-it/justify-disable/blob/main/CHANGELOG.md) to verify accuracy.
+
+## Rationale
+
+Suppressions without a stated reason rot: nobody remembers why a rule was switched off, so nobody dares to switch it back on. `justify-disable` fails when an `eslint-disable` or `stylelint-disable` directive has no `@todo <reason>` comment directly above it.
+
+It is heavily inspired by unicorn's [`expiring-todo-comments`](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/expiring-todo-comments.md). A `@todo` can carry a bracketed condition (`@todo [2030-01-01] …`) that expires it: a date, the project's own version, an engine or dependency range, or a dependency being added or removed. See [todo conditions](./todo-conditions.md).
+
+## Install
+
+```bash
+npm install --save-dev @ladamczyk/justify-disable
+```
+
+or run it directly:
+
+```bash
+npx @ladamczyk/justify-disable
+```
+
+## Changelog
+
+Release history lives in the repo — [`CHANGELOG.md`](https://github.com/ladamczyk-it/justify-disable/blob/main/CHANGELOG.md).

@@ -1,0 +1,282 @@
+/*
+ * One 12s loop: rows appear → scan checks each directive → line 7 is flagged
+ * and the fail block prints → a @todo row slides in above it → pass. Base
+ * styles are the final "fixed" frame, so reduced motion just switches
+ * animations off.
+ */
+
+.wrapper {
+  --loop: 12s;
+  --h: 1.9em;
+  --ok: oklch(0.75 0.16 150);
+  --bad: oklch(0.7 0.19 20);
+}
+
+/* ── Code ──────────────────────────────────────────────────────────────── */
+
+.code {
+  position: relative;
+  min-height: calc(var(--h) * 9);
+  padding: 0.75rem 0.9rem;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: var(--h);
+  max-height: var(--h);
+  border-radius: 0.3rem;
+  overflow: hidden;
+  animation: rowIn var(--loop) calc(var(--i) * 0.12s) infinite both;
+}
+
+.line {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre;
+}
+
+.markOk,
+.flagBad,
+.flagOk {
+  min-width: 1.2em;
+  text-align: right;
+}
+
+.markOk,
+.flagOk {
+  color: var(--ok);
+}
+
+.flagBad {
+  color: var(--bad);
+}
+
+.markOk {
+  animation: markIn var(--loop) calc(var(--i) * 0.3s) infinite both;
+}
+
+.scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0.75rem;
+  height: 2px;
+  opacity: 0;
+  background: oklch(0.75 0.15 var(--cv-hue));
+  box-shadow: 0 0 12px 2px oklch(0.75 0.15 var(--cv-hue) / 60%);
+  animation: scan var(--loop) infinite both;
+}
+
+/* Line 7's directive: flagged red while nothing justifies it, then checked. */
+.flagged {
+  animation:
+    rowIn var(--loop) calc(var(--i) * 0.12s) infinite both,
+    flaggedRow var(--loop) infinite both;
+}
+
+.flagMark {
+  display: grid;
+  justify-items: end;
+}
+
+.flagBad,
+.flagOk {
+  grid-area: 1 / 1;
+}
+
+.flagBad {
+  opacity: 0;
+  animation: flagBad var(--loop) infinite both;
+}
+
+.flagOk {
+  animation: flagOk var(--loop) infinite both;
+}
+
+/* The fix: absent until the fail block prints, then slides in above line 7. */
+.inserted {
+  color: var(--ok);
+  animation: insertedRow var(--loop) infinite both;
+}
+
+/* ── Terminal ──────────────────────────────────────────────────────────── */
+
+.output {
+  display: grid;
+  min-height: calc(var(--h) * 2);
+  margin-top: 0.4rem;
+  white-space: pre;
+}
+
+.fail,
+.pass {
+  grid-area: 1 / 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.6;
+}
+
+.fail {
+  opacity: 0;
+  color: var(--bad);
+  animation: fail var(--loop) infinite both;
+}
+
+.pass {
+  color: var(--ok);
+  animation: pass var(--loop) infinite both;
+}
+
+/* ── Keyframes (percentages of --loop) ─────────────────────────────────── */
+
+@keyframes rowIn {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  5%,
+  92% {
+    opacity: 1;
+    transform: none;
+  }
+  97%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes markIn {
+  0%,
+  22% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  24%,
+  92% {
+    opacity: 1;
+    transform: none;
+  }
+  97%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes scan {
+  0%,
+  19% {
+    opacity: 0;
+    top: 0.75rem;
+  }
+  20% {
+    opacity: 1;
+  }
+  38% {
+    opacity: 1;
+    top: calc(0.75rem + var(--h) * 8);
+  }
+  40%,
+  100% {
+    opacity: 0;
+    top: calc(0.75rem + var(--h) * 8);
+  }
+}
+
+@keyframes flaggedRow {
+  0%,
+  36% {
+    background: transparent;
+  }
+  38%,
+  64% {
+    background: oklch(0.7 0.19 20 / 16%);
+  }
+  68%,
+  100% {
+    background: transparent;
+  }
+}
+
+@keyframes flagBad {
+  0%,
+  36% {
+    opacity: 0;
+  }
+  38%,
+  66% {
+    opacity: 1;
+  }
+  67%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes flagOk {
+  0%,
+  66% {
+    opacity: 0;
+  }
+  67%,
+  92% {
+    opacity: 1;
+  }
+  97%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes insertedRow {
+  0%,
+  62% {
+    opacity: 0;
+    max-height: 0;
+    transform: translateX(-30%);
+  }
+  66%,
+  92% {
+    opacity: 1;
+    max-height: var(--h);
+    transform: none;
+  }
+  97%,
+  100% {
+    opacity: 0;
+    max-height: var(--h);
+  }
+}
+
+@keyframes fail {
+  0%,
+  42% {
+    opacity: 0;
+  }
+  44%,
+  62% {
+    opacity: 1;
+  }
+  64%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes pass {
+  0%,
+  69% {
+    opacity: 0;
+  }
+  71%,
+  92% {
+    opacity: 1;
+  }
+  97%,
+  100% {
+    opacity: 0;
+  }
+}
