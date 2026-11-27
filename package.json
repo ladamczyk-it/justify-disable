@@ -16,6 +16,7 @@
     "quality-gate",
     "qoq"
   ],
+  "homepage": "https://justify-disable.adamczyk.ovh/",
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/ladamczyk-it/justify-disable.git"
