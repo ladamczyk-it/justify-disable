@@ -1,5 +1,9 @@
 # @ladamczyk/justify-disable
 
+Fail the build on unexplained lint suppressions: every `eslint-disable` and `stylelint-disable` needs a written `@todo` reason directly above it, and that reason can expire on a date, a version or a dependency change. A CLI and a JavaScript API, a guardrail for AI-written and human code, and an optional check inside [qoq](https://qoq.adamczyk.ovh/).
+
+Docs: [justify-disable.adamczyk.ovh](https://justify-disable.adamczyk.ovh/)
+
 ## Rationale
 
 Suppressions without a stated reason rot: nobody remembers why a rule was switched off, so nobody dares to switch it back on. `justify-disable` fails when an `eslint-disable` or `stylelint-disable` directive has no `@todo <reason>` comment directly above it.
@@ -216,6 +220,14 @@ const result = await lint({ config: { ignorePatterns: ['dist/**'] }, stats: fals
 
 Additional exports: `loadConfig`, `DEFAULT_CONFIG_FILES`, `DEFAULT_TOOLS`, `DEFAULT_EXTENSIONS`, `DEFAULT_CONCURRENCY`, `DEFAULT_RULES`, `gitProvider`, and the types `IToolDirectives`, `IProvidedFile`, `IProviderContext`, `TFileProvider`, `IJustifyDisableConfig`, `ILintOptions`, `IViolation`, `ILintResult`, `TRuleName`, `TRuleSeverity`.
 
+## AI agents and CI
+
+Adding a disable comment is the quickest way for an AI coding agent to make a lint error go away. Justify-disable makes that suppression fail the run until a `@todo <reason>` sits on the line above it. Exit code `1` means at least one `error`-severity violation, `2` means the run itself failed, and `--json` prints `{ passed, scanned, violations[] }` (each violation: `path`, `line`, `column`, `directive`, `tool`, `rule`, `severity`, `message`). Runs with `--json`, `CI=true` or no terminal are never prompted. An `AGENTS.md` snippet is in [AI agents and CI](https://justify-disable.adamczyk.ovh/docs/ai-agents-and-ci).
+
+## qoq
+
+[qoq](https://qoq.adamczyk.ovh/) runs justify-disable in-process when `qoq.config.js` has `justifyDisable: { severity: 'warn' | 'error' }` (default `'off'`). With `error` an unexplained disable fails `qoq --check`. qoq passes its own config, so `justify-disable.config.*` is not read there, `missingDate` stays off and the scan follows qoq's ESLint and Stylelint file scope. `--skip-justify-disable` skips it for one run. More in [qoq integration](https://justify-disable.adamczyk.ovh/docs/qoq).
+
 ## Documentation
 
-[Detailed documentation](docs/index.md)
+[Documentation site](https://justify-disable.adamczyk.ovh/) · [maintainer docs](docs/index.md)

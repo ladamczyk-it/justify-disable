@@ -1,8 +1,11 @@
 ---
-title: Command line
+title: 'justify-disable CLI options and exit codes'
 sidebar_position: 3
-description: 'The justify-disable command, its options and exit codes.'
+description: 'Every justify-disable command-line option, from --json to --concurrency, the pathspecs it accepts and what exit codes 0, 1 and 2 mean in CI.'
+keywords: [justify-disable cli, eslint-disable check, exit codes, json output, ci]
 ---
+
+The `justify-disable` command scans the git-tracked files of the current repository, or only the pathspecs you pass, and fails when a lint disable directive has no `@todo` reason above it.
 
 ```bash
 justify-disable                  # scan the whole repo

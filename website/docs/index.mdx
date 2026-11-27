@@ -1,7 +1,17 @@
 ---
-title: Introduction
+title: 'justify-disable: require a reason for every lint disable'
 sidebar_position: 1
-description: 'CLI that requires a written @todo reason above every eslint-disable and stylelint-disable directive, with optional conditions that expire it.'
+description: 'justify-disable fails the build when an eslint-disable or stylelint-disable has no @todo reason above it, and can expire that reason. A CLI and a JS API.'
+keywords:
+  [
+    eslint-disable,
+    stylelint-disable,
+    require description,
+    lint suppression,
+    expiring todo,
+    ai coding agents,
+    quality gate,
+  ]
 ---
 
 import styles from '@internal/docusaurus-theme/github-button.module.css';
@@ -18,25 +28,55 @@ import styles from '@internal/docusaurus-theme/github-button.module.css';
 
 # Justify-disable
 
+Justify-disable is a CLI and JavaScript API that fails the build when an `eslint-disable` or `stylelint-disable` directive has no written `@todo <reason>` comment directly above it. A reason can carry a condition that expires it on a date, a version or a dependency change. It reads files with git, so it runs without ESLint or Stylelint installed.
+
 > Content is verified against **`@ladamczyk/justify-disable` v1.0.1**. See [`CHANGELOG.md`](https://github.com/ladamczyk-it/justify-disable/blob/main/CHANGELOG.md) to verify accuracy.
 
-## Rationale
+## Why
 
-Suppressions without a stated reason rot: nobody remembers why a rule was switched off, so nobody dares to switch it back on. `justify-disable` fails when an `eslint-disable` or `stylelint-disable` directive has no `@todo <reason>` comment directly above it.
+Suppressions without a stated reason rot: nobody remembers why a rule was switched off, so nobody dares to switch it back on. AI coding agents make this worse, because adding a disable comment is the quickest way to make a lint error go away. Justify-disable turns every suppression into a decision someone wrote down, and lets that decision expire.
 
-It is heavily inspired by unicorn's [`expiring-todo-comments`](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/expiring-todo-comments.md). A `@todo` can carry a bracketed condition (`@todo [2030-01-01] …`) that expires it: a date, the project's own version, an engine or dependency range, or a dependency being added or removed. See [todo conditions](./todo-conditions.md).
+```ts
+// @todo [2030-01-01] Legacy SDK returns any; type it after the v3 upgrade.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const response: any = await legacyCall();
+```
+
+It is heavily inspired by unicorn's [`expiring-todo-comments`](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/expiring-todo-comments.md). See [The rule](./the-rule.md) for what counts as a reason and [Todo conditions](./todo-conditions.md) for expiry.
 
 ## Install
 
 ```bash
 npm install --save-dev @ladamczyk/justify-disable
+npx justify-disable
 ```
 
-or run it directly:
+or run it without installing:
 
 ```bash
 npx @ladamczyk/justify-disable
 ```
+
+It needs Node `^22.22.2`, `^24.15.0` or `>=26`, npm 10 or later, and a git repository (or a custom [provider](./configuration.md)).
+
+## Compared with ESLint rules
+
+| What you get                        | justify-disable                                                | `eslint-comments/require-description` | `unicorn/expiring-todo-comments` |
+| ----------------------------------- | -------------------------------------------------------------- | ------------------------------------- | -------------------------------- |
+| Requires a reason for lint disables | yes, a `@todo` comment on the line above                       | yes, after `--` in the same comment   | no, it checks TODO comments      |
+| Stylelint directives                | yes                                                            | no                                    | no                               |
+| Reason expires                      | date, own version, engine, dependency added, removed or ranged | no                                    | yes, for TODO comments           |
+| Custom directives (`@ts-ignore`, …) | yes, through `tools` config                                    | yes, through `additionalDirectives`   | no                               |
+| Needs ESLint                        | no                                                             | yes                                   | yes                              |
+
+The ESLint rules are good choices when ESLint already runs everywhere. Justify-disable is for one check across ESLint and Stylelint directives, outside the linters, with reasons that expire.
+
+## Use it as a gate
+
+- [Command line](./cli.md): exit `1` on any error-severity violation, `--json` for machines.
+- [AI agents and CI](./ai-agents-and-ci.md): the JSON shape, exit codes and an `AGENTS.md` snippet.
+- [qoq integration](./qoq.md): turn it on in `qoq --check`.
+- [JavaScript API](./javascript-api.md): `lint()` and `format()` from Node.
 
 ## Changelog
 

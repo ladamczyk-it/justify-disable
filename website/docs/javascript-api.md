@@ -1,8 +1,11 @@
 ---
-title: JavaScript API
+title: 'justify-disable JavaScript API: lint() and format()'
 sidebar_position: 6
-description: 'lint(), format() and the other exports of the JavaScript API.'
+description: 'Run justify-disable from Node: lint() options and result, format() for text or JSON, custom file providers, and the default tools, rules and extensions.'
+keywords: [justify-disable api, lint api, eslint-disable checker node, file provider, typescript]
 ---
+
+The JavaScript API runs the same check as the CLI from Node and returns the result as an object, so tools can call it in-process instead of starting `justify-disable --json`.
 
 ```ts
 import { lint, format } from '@ladamczyk/justify-disable';
