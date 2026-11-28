@@ -38,6 +38,7 @@ const OPENER =
 const Home = (): ReactNode => (
   <HomePage
     features={FEATURES}
+    heading="Justify-disable: explain every disable"
     install="npm install --save-dev @ladamczyk/justify-disable"
     opener={OPENER}
   >
