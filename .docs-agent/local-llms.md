@@ -1,0 +1,1 @@
+In llms.txt, word the qoq line as: '- [qoq](https://qoq.adamczyk.ovh/): the JavaScript/TypeScript quality suite that runs justify-disable as an optional check of qoq --check (justifyDisable: { severity } in qoq.config.js); details on {{SITE_URL}}/docs/qoq'.

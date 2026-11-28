@@ -23,8 +23,12 @@ const FEATURES = [
   },
   {
     title: 'Built for CI and AI agents',
-    description:
-      'Exit code 1 on any violation, JSON output, a JavaScript API, custom directives such as @ts-ignore, and an optional check inside qoq.',
+    description: (
+      <>
+        Exit code 1 on any violation, JSON output, a JavaScript API, custom directives such as
+        @ts-ignore, and an optional check inside <a href="https://qoq.adamczyk.ovh/">qoq</a>.
+      </>
+    ),
   },
 ];
 
@@ -34,6 +38,7 @@ const OPENER =
 const Home = (): ReactNode => (
   <HomePage
     features={FEATURES}
+    heading="Justify-disable: explain every disable"
     install="npm install --save-dev @ladamczyk/justify-disable"
     opener={OPENER}
   >

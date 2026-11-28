@@ -2,6 +2,8 @@
 
 > Justify-disable (@ladamczyk/justify-disable) is a CLI and JavaScript API that fails the build when an eslint-disable or stylelint-disable directive has no written @todo reason directly above it. A reason can expire on a date, a version or a dependency change. It is a guardrail against AI coding agents and people silencing lint rules without saying why, and an optional check inside qoq.
 
+Full docs: https://justify-disable.adamczyk.ovh/llms-full.txt (each page also as Markdown at <page URL>.md)
+
 Install and run: `npm install --save-dev @ladamczyk/justify-disable` then `npx justify-disable`, or `npx @ladamczyk/justify-disable`. Needs Node ^22.22.2, ^24.15.0 or >=26, npm 10+, and a git repository (files come from `git ls-files`, respecting .gitignore) unless a custom provider is configured. It does not need ESLint or Stylelint installed.
 
 The rule: the comment ending on the line directly above a disable directive must contain `@todo <reason>` (case-sensitive). A same-line `-- reason` does not count, and a blank line breaks the link. Stylelint reasons must be a `/* */` block comment. `@todo [conditions]` with no prose after it is reported as missingReason.
@@ -27,13 +29,14 @@ JavaScript API (ESM, TypeScript types included): `lint({ paths?, config?, concur
 
 qoq: enable with `justifyDisable: { severity: 'warn' | 'error' }` in qoq.config.js (default off). error fails `qoq --check`, warn reports only. qoq passes its own config, so justify-disable.config is not read there; missingDate stays off; the scan follows qoq's ESLint and Stylelint file scope; `--skip-justify-disable` skips it; `--json` writes justify-disable-report.json, which the /qoq fix skill reads.
 
-Compared with eslint-comments/require-description (reason after `--` in the same comment, ESLint only, no expiry) and unicorn/expiring-todo-comments (expiring conditions for TODO comments, not for disable directives): justify-disable checks ESLint and Stylelint directives outside the linters and lets the reason expire.
+Compared with eslint-comments/require-description (reason after `--` in the same comment, ESLint only, no expiry) and unicorn/expiring-todo-comments (expiring conditions for TODO comments, not for disable directives): justify-disable checks ESLint and Stylelint directives outside the linters and lets the reason expire. Built-ins: ESLint accepts a same-line `-- reason` but cannot require one; Stylelint's `reportDescriptionlessDisables` requires it for Stylelint disables. justify-disable does not accept a same-line `-- reason`.
 
 Usage statistics: opt-in; the answer is stored as `stats` in the project config. With `stats: true` stored, every CLI run counts, CI included; only the tool name is sent.
 
 ## Docs
 
 - [justify-disable: require a reason for every lint disable](https://justify-disable.adamczyk.ovh/docs/): what it does, install, comparison with ESLint rules
+- [Require a reason on eslint-disable: every option compared](https://justify-disable.adamczyk.ovh/docs/alternatives): every option compared, built-ins included, and when you don't need justify-disable
 - [How justify-disable decides a lint disable is justified](https://justify-disable.adamczyk.ovh/docs/the-rule): what counts as a reason, defaults, scope and limits
 - [justify-disable CLI options and exit codes](https://justify-disable.adamczyk.ovh/docs/cli): pathspecs, --json, --concurrency and exit codes
 - [justify-disable configuration file reference](https://justify-disable.adamczyk.ovh/docs/configuration): tools, extensions, ignorePatterns, concurrency, rules and provider
@@ -47,4 +50,5 @@ Usage statistics: opt-in; the answer is stored as `stats` in the project config.
 - [justify-disable usage statistics](https://justify-disable.adamczyk.ovh/docs/usage-statistics): the opt-in prompt and exactly what is sent
 - [GitHub repository](https://github.com/ladamczyk-it/justify-disable): source, issues and CHANGELOG.md
 - [npm package](https://www.npmjs.com/package/@ladamczyk/justify-disable): @ladamczyk/justify-disable
-- [qoq](https://qoq.adamczyk.ovh/): the JavaScript/TypeScript quality suite that can run justify-disable
+- [Author's tools](https://adamczyk.ovh/llms.txt): hub llms.txt listing qoq and its sibling tools
+- [qoq](https://qoq.adamczyk.ovh/): the JavaScript/TypeScript quality suite that runs justify-disable as an optional check of qoq --check (justifyDisable: { severity } in qoq.config.js); details on https://justify-disable.adamczyk.ovh/docs/qoq

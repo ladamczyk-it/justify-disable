@@ -70,7 +70,7 @@ It needs Node `^22.22.2`, `^24.15.0` or `>=26`, npm 10 or later, and a git repos
 | Custom directives (`@ts-ignore`, …) | yes, through `tools` config                                    | yes, through `additionalDirectives`   | no                               |
 | Needs ESLint                        | no                                                             | yes                                   | yes                              |
 
-The ESLint rules are good choices when ESLint already runs everywhere. Reach for this one when you want a single check across ESLint and Stylelint directives, outside the linters, with reasons that expire.
+The ESLint rules are good choices when ESLint already runs everywhere, and Stylelint's own `reportDescriptionlessDisables` option requires a `-- reason` on Stylelint disables. Reach for this one when you want a single check across ESLint and Stylelint directives, outside the linters, with reasons that expire. [Alternatives](./alternatives.md) compares every option, built-ins included, and says when you don't need this tool.
 
 ## Use it as a gate
 

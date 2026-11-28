@@ -13,7 +13,7 @@ keywords:
   ]
 ---
 
-A `@todo` reason can carry a bracketed condition that expires it, so a lint disable doesn't outlive the reason it was added for. When a condition is met, the directive is reported as `expired` and the run fails until someone looks at it again. The conditions are heavily inspired by unicorn's [`expiring-todo-comments`](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/expiring-todo-comments.md) rule.
+A `@todo` reason can carry a bracketed condition that expires it, so a lint disable doesn't outlive the reason it was added for. When a condition is met, the directive is reported as `expired` and the run fails until someone looks at it again. The conditions are heavily inspired by unicorn's [`expiring-todo-comments`](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/expiring-todo-comments.md) rule. That rule expires `TODO` comments; these expire the reason for an `eslint-disable` or `stylelint-disable` directive, so the suppression itself comes up for review.
 
 ## Syntax
 
