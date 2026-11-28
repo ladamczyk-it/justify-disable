@@ -16,6 +16,27 @@ keywords:
 
 A guardrail for AI coding agents such as Claude Code, Codex or Cursor, and a gate for CI. An agent that silences a lint error with `eslint-disable` must also write down why, in a `@todo` comment a reviewer can read, and the run fails until it does.
 
+## Why agents add lint disables
+
+An agent is asked to make the checks pass. When a lint error is hard to fix, a disable comment is the shortest diff that turns the run green, and the diff reads as done. The suppression lands with no explanation, and a reviewer skimming a large change rarely stops on one comment line.
+
+```diff
++ // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  saveDraft(state);
+```
+
+With justify-disable in the loop, that diff fails. The agent either fixes the code or states its reason where the reviewer will see it:
+
+```diff
++ // @todo [2030-01-01] saveDraft is fire-and-forget until the queue lands; await it then.
++ // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  saveDraft(state);
+```
+
+## Ban or justify
+
+Banning every disable comment sounds stricter, but real code has real exceptions, and a ban pushes them into config overrides nobody reads. Requiring a reason keeps the exception next to the code, and a [todo condition](./todo-conditions.md) makes sure it is looked at again. To forbid disabling particular rules outright, pair this with `eslint-comments/no-restricted-disable`; see [Alternatives](./alternatives.md).
+
 ## The contract
 
 - **Exit codes.** `0` when no violation has `error` severity (warnings may still be printed), `1` when at least one does, `2` on any other error: a bad config, not a git repository, a pathspec that matched no files.
@@ -53,6 +74,22 @@ npx @ladamczyk/justify-disable --json > justify-disable-report.json
 ```
 
 Files come from `git ls-files`, so tracked and untracked-but-not-ignored files are checked and `.gitignore` is respected.
+
+As a GitHub Actions job (`CI=true` is set there, so the run never prompts):
+
+```yaml
+name: lint-suppressions
+on: [pull_request]
+jobs:
+  justify-disable:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - run: npx @ladamczyk/justify-disable
+```
 
 ## AGENTS.md snippet
 
