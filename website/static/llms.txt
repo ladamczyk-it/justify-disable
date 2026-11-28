@@ -50,5 +50,5 @@ Usage statistics: opt-in; the answer is stored as `stats` in the project config.
 - [justify-disable usage statistics](https://justify-disable.adamczyk.ovh/docs/usage-statistics): the opt-in prompt and exactly what is sent
 - [GitHub repository](https://github.com/ladamczyk-it/justify-disable): source, issues and CHANGELOG.md
 - [npm package](https://www.npmjs.com/package/@ladamczyk/justify-disable): @ladamczyk/justify-disable
-- [qoq](https://qoq.adamczyk.ovh/): the JavaScript/TypeScript quality suite that can run justify-disable
-- [Author's tools](https://adamczyk.ovh/llms.txt): hub llms.txt listing qoq and its sibling tools (Skillslint, Structurelint, Outdated)
+- [Author's tools](https://adamczyk.ovh/llms.txt): hub llms.txt listing qoq and its sibling tools
+- [qoq](https://qoq.adamczyk.ovh/): the JavaScript/TypeScript quality suite that runs justify-disable as an optional check of qoq --check (justifyDisable: { severity } in qoq.config.js); details on https://justify-disable.adamczyk.ovh/docs/qoq
