@@ -2,6 +2,8 @@
 
 > Justify-disable (@ladamczyk/justify-disable) is a CLI and JavaScript API that fails the build when an eslint-disable or stylelint-disable directive has no written @todo reason directly above it. A reason can expire on a date, a version or a dependency change. It is a guardrail against AI coding agents and people silencing lint rules without saying why, and an optional check inside qoq.
 
+Full docs: https://justify-disable.adamczyk.ovh/llms-full.txt (each page also as Markdown at <page URL>.md)
+
 Install and run: `npm install --save-dev @ladamczyk/justify-disable` then `npx justify-disable`, or `npx @ladamczyk/justify-disable`. Needs Node ^22.22.2, ^24.15.0 or >=26, npm 10+, and a git repository (files come from `git ls-files`, respecting .gitignore) unless a custom provider is configured. It does not need ESLint or Stylelint installed.
 
 The rule: the comment ending on the line directly above a disable directive must contain `@todo <reason>` (case-sensitive). A same-line `-- reason` does not count, and a blank line breaks the link. Stylelint reasons must be a `/* */` block comment. `@todo [conditions]` with no prose after it is reported as missingReason.
